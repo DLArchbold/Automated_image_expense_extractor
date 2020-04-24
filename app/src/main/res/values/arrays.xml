@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- These are the options displayed in the gender drop-down Spinner -->
+    <string-array name="array_expense_income_options">
+        <item>@string/expense</item>
+        <item>@string/income</item>
+    </string-array>
+    <string-array name="array_expense_income_category">
+        <item>@string/bills</item>
+        <item>@string/house</item>
+        <item>@string/eating_out</item>
+        <item>@string/food</item>
+        <item>@string/health</item>
+        <item>@string/transport</item>
+        <item>@string/entertainment</item>
+        <item>@string/gifts</item>
+        <item>@string/haircut</item>
+        <item>@string/clothes</item>
+        <item>@string/savings</item>
+        <item>@string/income</item>
+        <item>@string/deposit</item>
+    </string-array>
+</resources>

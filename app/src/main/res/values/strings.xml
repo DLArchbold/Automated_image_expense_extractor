@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">BudgetApplication</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Kok Wei Jin</string>
+    <string name="nav_header_subtitle">kweijin97@1utar.my</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Personal Information</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_tools">Tools</string>
+    <string name="menu_share">Daily</string>
+    <string name="menu_send">Monthly</string>
+    <string name="expense_income_option">Expense/Income</string>
+    <string name="amount_description">Amount/Description</string>
+    <string name="edit_amount">Amount</string>
+    <string name="edit_description">Description</string>
+    <string name="date">Date</string>
+    <string name="pick_date">Pick a date</string>
+    <string name="expense_income_category">Pick a category</string>
+    <string name="expense">Expense</string>
+    <string name="income">Income</string>
+    <string name = "bills">Bills</string>
+    <string name = "house">House</string>
+    <string name = "eating_out">Eating out</string>
+    <string name = "food">Food</string>
+    <string name = "health">Health</string>
+    <string name = "transport">Transport</string>
+    <string name = "entertainment">Entertainment</string>
+    <string name = "gifts">Gifts</string>
+    <string name = "haircut">Haircut</string>
+    <string name = "clothes">Clothes</string>
+    <string name = "manual_add_expense">Manually Add an Expense</string>
+    <string name = "savings">Savings</string>
+    <string name = "deposit">Deposit</string>
+
+</resources>

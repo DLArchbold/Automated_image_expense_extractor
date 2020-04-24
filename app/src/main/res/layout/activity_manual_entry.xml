@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+    <!--Expense/income spinner, amount edittext, category dropdown
+    , description edittext, date picker !-->
+
+
+    <!-- Expense/Income option -->
+    <LinearLayout
+        android:id="@+id/container_expense_income_option"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="@string/expense_income_option"
+            style="@style/CategoryStyle" />
+
+        <!-- Input field -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <!-- Expense/Income drop-down spinner -->
+            <Spinner
+                android:id="@+id/spinner_expense_income_option"
+                android:layout_height="48dp"
+                android:layout_width="wrap_content"
+                android:paddingRight="16dp"
+                android:spinnerMode="dropdown"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Date category -->
+    <LinearLayout
+        android:id="@+id/container_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="@string/date"
+            style="@style/CategoryStyle" />
+
+        <!-- Input field -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <!-- Date fields -->
+            <!-- Day field -->
+            <EditText
+                android:id="@+id/edit_day"
+                android:hint="Day"
+                android:inputType="number"
+                style="@style/EditorFieldStyle" />
+
+            <!-- Month field -->
+            <EditText
+                android:id="@+id/edit_month"
+                android:hint="Month"
+                android:inputType="number"
+                style="@style/EditorFieldStyle" />
+
+            <EditText
+                android:id="@+id/edit_year"
+                android:hint="Year"
+                android:inputType="number"
+                style="@style/EditorFieldStyle" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <!-- Amount/Description category -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="@string/amount_description"
+            style="@style/CategoryStyle" />
+
+        <!-- Input fields -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:paddingLeft="4dp"
+        android:orientation="vertical">
+
+        <!-- Name field -->
+        <EditText
+            android:id="@+id/edit_amount"
+            android:hint="@string/edit_amount"
+            android:inputType="numberDecimal"
+            style="@style/EditorFieldStyle" />
+
+        <!-- description field -->
+        <EditText
+            android:id="@+id/edit_description"
+            android:hint="@string/edit_description"
+            android:inputType="textAutoComplete"
+            style="@style/EditorFieldStyle" />
+    </LinearLayout>
+    </LinearLayout>
+
+
+    <!-- Expense/income category -->
+    <LinearLayout
+        android:id="@+id/container_expense_income_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="@string/expense_income_category"
+            style="@style/CategoryStyle" />
+
+        <!-- Input field -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <!-- Expense/Income drop-down spinner -->
+            <Spinner
+                android:id="@+id/spinner_expense_income_category"
+                android:layout_height="48dp"
+                android:layout_width="wrap_content"
+                android:paddingRight="16dp"
+                android:spinnerMode="dropdown"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Expense/income category -->
+    <LinearLayout
+        android:id="@+id/container_add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id = "@+id/button_add"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Add"/>
+    </LinearLayout>
+</LinearLayout>
