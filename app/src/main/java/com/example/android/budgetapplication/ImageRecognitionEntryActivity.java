@@ -22,304 +22,222 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
+import android.annotation.TargetApi;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.document.FirebaseVisionDocumentText;
+import com.google.firebase.ml.vision.document.FirebaseVisionDocumentTextRecognizer;
+import com.google.firebase.ml.vision.text.FirebaseVisionText;
+import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 public class ImageRecognitionEntryActivity extends AppCompatActivity {
 
-
-
-    private Camera mCamera;
-    private CameraPreview mPreview;
+    private GraphicOverlay mGraphicOverlay;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_image_recognition_entry);
+        mGraphicOverlay = (GraphicOverlay)findViewById(R.id.graphic_overlay);
+        TextView camOpen = (TextView) findViewById(R.id.cam_open);
+        camOpen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dispatchTakePictureIntent();
 
-        // Create an instance of Camera
-        mCamera = getCameraInstance();
+            }
+        });
 
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
+        ImageView imgView = (ImageView) findViewById(R.id.display_image);
+        imgView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setContentView(R.layout.activity_image_recognition_entry);
+            }
+        });
+
+    }
+
+
+    //Check if there's an app to handle intent
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            try{
+                photoFile = createImageFile();
+            }catch(IOException ex)
+            {
+                //Error whle creating the file
+            }
+
+            if(photoFile !=null)
+            {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.android.fileprovider",
+                        photoFile);
+
+                //In .putExtra because photoURI is defined, the extra in onActivityResult will be null
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+
+            }
 
 
 
-        // Add a listener to the Capture button
-        Button captureButton = (Button) findViewById(R.id.button_capture);
-        captureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // get an image from the camera
-                        mCamera.takePicture(null, null, mPicture);
-                    }
-                }
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            galleryAddPic();
+        }
+    }
+
+
+    String currentPhotoPath;
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
         );
 
-
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
+    @TargetApi(29)
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(currentPhotoPath);
 
-    /** Check if this device has a camera */
-    private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
-            // this device has a camera
-            return true;
-        } else {
-            // no camera on this device
-            return false;
-        }
-    }
-
-
-    /** A safe way to get an instance of the Camera object. */
-    public static Camera getCameraInstance(){
-        Camera c = null;
         try {
-            c = Camera.open(); // attempt to get a Camera instance
+
+            ExifInterface exif = new ExifInterface(f.getAbsolutePath());
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+            Matrix matrix = new Matrix();
+            matrix.postRotate(90);
+            Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+            Bitmap rotatedBitMap = Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.getWidth(), myBitmap.getHeight(), matrix, true);
+            ImageView imgView = (ImageView) findViewById(R.id.display_image);
+            imgView.setImageBitmap(rotatedBitMap);
+
+
+            runCloudTextRecognition(rotatedBitMap);
+
+
+
+        }catch (IOException ex)
+        {
+
         }
-        catch (Exception e){
-            // Camera is not available (in use or does not exist)
-        }
-        return c; // returns null if camera is unavailable
+
+        Log.e("CurrentPhotoPath", currentPhotoPath);
+
+
+
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+
+
     }
 
 
 
-    private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
 
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
 
-            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-            if (pictureFile == null){
-                Log.d("imagerecognition", "Error creating media file, check storage permissions");
-                return;
+
+
+    private void runCloudTextRecognition(Bitmap mSelectedImage) {
+
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(mSelectedImage);
+        FirebaseVisionDocumentTextRecognizer recognizer = FirebaseVision.getInstance()
+                .getCloudDocumentTextRecognizer();
+        recognizer.processImage(image)
+                .addOnSuccessListener(
+                        new OnSuccessListener<FirebaseVisionDocumentText>() {
+                            @Override
+                            public void onSuccess(FirebaseVisionDocumentText texts) {
+
+                                processCloudTextRecognitionResult(texts);
+                            }
+                        })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Task failed with an exception
+
+                                e.printStackTrace();
+                            }
+                        });
+    }
+
+    private void processCloudTextRecognitionResult(FirebaseVisionDocumentText text) {
+        // Task completed successfully
+        if (text == null) {
+            Log.e("MainActivity", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!FAIL");
+            return;
+        }
+        mGraphicOverlay.clear();
+        List<FirebaseVisionDocumentText.Block> blocks = text.getBlocks();
+        for (int i = 0; i < blocks.size(); i++) {
+            List<FirebaseVisionDocumentText.Paragraph> paragraphs = blocks.get(i).getParagraphs();
+            for (int j = 0; j < paragraphs.size(); j++) {
+                List<FirebaseVisionDocumentText.Word> words = paragraphs.get(j).getWords();
+                for (int l = 0; l < words.size(); l++) {
+
+
+                    Log.e("MainActivity", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
+                    CloudTextGraphic cloudDocumentTextGraphic = new CloudTextGraphic(mGraphicOverlay,
+                            words.get(l));
+                    mGraphicOverlay.add(cloudDocumentTextGraphic);
+                }
             }
-
-            try {
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
-                fos.close();
-            } catch (FileNotFoundException e) {
-                Log.d("imagerecognition", "File not found: " + e.getMessage());
-            } catch (IOException e) {
-                Log.d("imagerecognition", "Error accessing file: " + e.getMessage());
-            }
         }
-    };
-
-
-
-
-
-    @Override
-    protected void onPause() {
-        super.onPause();      // if you are using MediaRecorder, release it first
-        releaseCamera();              // release the camera immediately on pause event
-    }
-
-
-
-    private void releaseCamera(){
-        if (mCamera != null){
-            mCamera.release();        // release the camera for other applications
-            mCamera = null;
-        }
-    }
-
-
-    public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
-
-    /** Create a file Uri for saving an image or video */
-    private static Uri getOutputMediaFileUri(int type){
-        return Uri.fromFile(getOutputMediaFile(type));
-    }
-
-    /** Create a File for saving an image or video */
-    private static File getOutputMediaFile(int type){
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraApp");
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
-                Log.d("MyCameraApp", "failed to create directory");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
-        } else if(type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
-        } else {
-            return null;
-        }
-
-        return mediaFile;
     }
 }
-
-
-
-//public class ImageRecognitionEntryActivity extends AppCompatActivity {
-//
-//
-//
-//    private Camera mCamera;
-//    private CameraPreview mPreview;
-//
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_image_recognition_entry);
-//
-//        // Create an instance of Camera
-//        mCamera = getCameraInstance();
-//
-//        // Create our Preview view and set it as the content of our activity.
-//        mPreview = new CameraPreview(this, mCamera);
-//        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-//        preview.addView(mPreview);
-//
-//
-//
-//        // Add a listener to the Capture button
-//        Button captureButton = (Button) findViewById(R.id.button_capture);
-//        captureButton.setOnClickListener(
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        // get an image from the camera
-//                        mCamera.takePicture(null, null, mPicture);
-//                    }
-//                }
-//        );
-//
-//
-//    }
-//
-//    /** Check if this device has a camera */
-//    private boolean checkCameraHardware(Context context) {
-//        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
-//            // this device has a camera
-//            return true;
-//        } else {
-//            // no camera on this device
-//            return false;
-//        }
-//    }
-//
-//
-//    /** A safe way to get an instance of the Camera object. */
-//    public static Camera getCameraInstance(){
-//        Camera c = null;
-//        try {
-//            c = Camera.open(); // attempt to get a Camera instance
-//        }
-//        catch (Exception e){
-//            // Camera is not available (in use or does not exist)
-//        }
-//        return c; // returns null if camera is unavailable
-//    }
-//
-//
-//
-//    private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
-//
-//        @Override
-//        public void onPictureTaken(byte[] data, Camera camera) {
-//
-//            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-//            if (pictureFile == null){
-//                Log.d("imagerecognition", "Error creating media file, check storage permissions");
-//                return;
-//            }
-//
-//            try {
-//                FileOutputStream fos = new FileOutputStream(pictureFile);
-//                fos.write(data);
-//                fos.close();
-//            } catch (FileNotFoundException e) {
-//                Log.d("imagerecognition", "File not found: " + e.getMessage());
-//            } catch (IOException e) {
-//                Log.d("imagerecognition", "Error accessing file: " + e.getMessage());
-//            }
-//        }
-//    };
-//
-//
-//
-//
-//
-//    @Override
-//    protected void onPause() {
-//        super.onPause();      // if you are using MediaRecorder, release it first
-//        releaseCamera();              // release the camera immediately on pause event
-//    }
-//
-//
-//
-//    private void releaseCamera(){
-//        if (mCamera != null){
-//            mCamera.release();        // release the camera for other applications
-//            mCamera = null;
-//        }
-//    }
-//
-//
-//    public static final int MEDIA_TYPE_IMAGE = 1;
-//    public static final int MEDIA_TYPE_VIDEO = 2;
-//
-//    /** Create a file Uri for saving an image or video */
-//    private static Uri getOutputMediaFileUri(int type){
-//        return Uri.fromFile(getOutputMediaFile(type));
-//    }
-//
-//    /** Create a File for saving an image or video */
-//    private static File getOutputMediaFile(int type){
-//        // To be safe, you should check that the SDCard is mounted
-//        // using Environment.getExternalStorageState() before doing this.
-//
-//        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-//                Environment.DIRECTORY_PICTURES), "MyCameraApp");
-//        // This location works best if you want the created images to be shared
-//        // between applications and persist after your app has been uninstalled.
-//
-//        // Create the storage directory if it does not exist
-//        if (! mediaStorageDir.exists()){
-//            if (! mediaStorageDir.mkdirs()){
-//                Log.d("MyCameraApp", "failed to create directory");
-//                return null;
-//            }
-//        }
-//
-//        // Create a media file name
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//        File mediaFile;
-//        if (type == MEDIA_TYPE_IMAGE){
-//            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-//                    "IMG_"+ timeStamp + ".jpg");
-//        } else if(type == MEDIA_TYPE_VIDEO) {
-//            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-//                    "VID_"+ timeStamp + ".mp4");
-//        } else {
-//            return null;
-//        }
-//
-//        return mediaFile;
-//    }
-//}

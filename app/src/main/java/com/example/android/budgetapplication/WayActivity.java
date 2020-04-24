@@ -47,7 +47,7 @@ public class WayActivity extends AppCompatActivity {
 
                 Intent ImageRecognitionEntryIntent = new Intent(WayActivity.this, ImageRecognitionEntryActivity.class);
                 startActivity(ImageRecognitionEntryIntent);
-                finish();
+                //finish();
 
             }
         });

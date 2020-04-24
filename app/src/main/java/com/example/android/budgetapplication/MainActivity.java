@@ -27,6 +27,8 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.widget.TextView;
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
+
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -69,6 +71,10 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
         displayDatabaseInfo();
     }
+
+
+
+
     private void displayDatabaseInfo() {
         // To access our database, we instantiate our subclass of SQLiteOpenHelper
         // and pass the context, which is the current activity.
@@ -224,4 +230,9 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+
+
+
 }
