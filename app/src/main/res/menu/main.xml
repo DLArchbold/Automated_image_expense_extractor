@@ -6,4 +6,14 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_manual"
+        android:orderInCategory="100"
+        android:title="Manually enter expenses"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_image_recognition"
+        android:orderInCategory="100"
+        android:title="Use Image Recognition"
+        app:showAsAction="never" />
 </menu>

@@ -72,6 +72,12 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image_recognition_entry);
         mGraphicOverlay = (GraphicOverlay)findViewById(R.id.graphic_overlay);
         TextView camOpen = (TextView) findViewById(R.id.cam_open);
+
+
+        //Start camera immediately w/o prompt
+        dispatchTakePictureIntent();
+
+        //Ask whether to start camera when at prompt page after pressing back button
         camOpen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,6 +86,7 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
             }
         });
 
+        //Display prompt after done with image
         ImageView imgView = (ImageView) findViewById(R.id.display_image);
         imgView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,7 +172,8 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
             ImageView imgView = (ImageView) findViewById(R.id.display_image);
             imgView.setImageBitmap(rotatedBitMap);
 
-
+            TextView camOpen = (TextView) findViewById(R.id.cam_open);
+            camOpen.setText("");
             runCloudTextRecognition(rotatedBitMap);
 
 

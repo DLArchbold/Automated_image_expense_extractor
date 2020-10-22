@@ -4,33 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context=".ImageRecognitionEntryActivity"
     >
 
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id = "@+id/display_image"/>
+        android:id = "@+id/display_image"
+
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+
+        />
+
     <com.example.android.budgetapplication.GraphicOverlay
         android:id="@+id/graphic_overlay"
+
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        app:layout_constraintTop_toTopOf="@id/display_image"
-        app:layout_constraintBottom_toBottomOf="@id/display_image"
-        app:layout_constraintLeft_toLeftOf="@id/display_image"
-        app:layout_constraintRight_toRightOf="@id/display_image"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        />
+
+
+        app:layout_constraintBottom_toTopOf="@+id/display_image"
+        app:layout_constraintRight_toLeftOf="@+id/display_image"
+        app:layout_constraintTop_toBottomOf="@+id/display_image"
+        app:layout_constraintLeft_toRightOf="@+id/display_image"
+         />
     <TextView
         android:id = "@+id/cam_open"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text=""
+        android:text="Touch to launch camera"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+
          />
 
 
