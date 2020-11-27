@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.widget.ListView;
 import android.widget.TextView;
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
@@ -97,78 +98,27 @@ public class MainActivity extends AppCompatActivity
 
         };
 
-        Cursor cursor = db.query(
-                ExpenseEntry.TABLE_NAME,
+        /*
+        Perform query on content provider using content resolver using URI.
+        Use the {@link
+         */
+        Cursor cursor = getContentResolver().query(
+                ExpenseEntry.CONTENT_URI,
                 projection,
                 null,
                 null,
-                null,
-                null,
                 null
+
         );
 
+        //List view to populate
+        ListView list = (ListView)findViewById(R.id.list);
 
-        TextView displayView = (TextView) findViewById(R.id.text_view_main);
+        //Adapter to create list item view for each row of data in cursor
+        ExpenseCursorAdapter adapter = new ExpenseCursorAdapter(this, cursor);
 
-        try {
-            // Display the number of rows in the Cursor (which reflects the number of rows in the
-            // pets table in the database).
-
-            // Create a header in the Text View that looks like this:
-            //
-            // The pets table contains <number of rows in Cursor> pets.
-            // _id - name - breed - gender - weight
-            //
-            // In the while loop below, iterate through the rows of the cursor and display
-            // the information from each column in this order.
-            displayView.setText("The Expenses table contains " + cursor.getCount() + " expenses/income.\n\n");
-            displayView.append(ExpenseEntry._ID + " - " +
-                    ExpenseEntry.COLUMN_OPTION + " - " +
-                    ExpenseEntry.COLUMN_DAY + " - " +
-                    ExpenseEntry.COLUMN_MONTH + " - " +
-                    ExpenseEntry.COLUMN_YEAR + " - " +
-                    ExpenseEntry.COLUMN_AMOUNT + " - " +
-                    ExpenseEntry.COLUMN_DESCRIPTION + " - " +
-                    ExpenseEntry.COLUMN_CATEGORY + "\n");
-
-            // Figure out the index of each column
-            int idColumnIndex = cursor.getColumnIndex(ExpenseEntry._ID);
-            int optionColumnIndex = cursor.getColumnIndex(ExpenseEntry.COLUMN_OPTION);
-            int dayColumnIndex = cursor.getColumnIndex(ExpenseEntry.COLUMN_DAY);
-            int monthColumnIndex = cursor.getColumnIndex(ExpenseEntry.COLUMN_MONTH);
-            int yearColumnIndex = cursor.getColumnIndex(ExpenseEntry.COLUMN_YEAR);
-            int amountColumnIndex = cursor.getColumnIndex(ExpenseEntry.COLUMN_AMOUNT);
-            int descriptionColumnIndex = cursor.getColumnIndex(ExpenseEntry.COLUMN_DESCRIPTION);
-            int categoryColumnIndex = cursor.getColumnIndex(ExpenseEntry.COLUMN_CATEGORY);
-
-            // Iterate through all the returned rows in the cursor
-            while (cursor.moveToNext()) {
-                // Use that index to extract the String or Int value of the word
-                // at the current row the cursor is on.
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentOption = cursor.getString(optionColumnIndex);
-                String currentDay = cursor.getString(dayColumnIndex);
-                String currentMonth = cursor.getString(monthColumnIndex);
-                String currentYear = cursor.getString(yearColumnIndex);
-                double currentAmount = cursor.getDouble(amountColumnIndex);
-                String currentDescription = cursor.getString(descriptionColumnIndex);
-                String currentCategory = cursor.getString(categoryColumnIndex);
-                // Display the values from each column of the current row in the cursor in the TextView
-                displayView.append(("\n" + currentID + " - " +
-                        currentOption + " - " +
-                        currentDay + " - " +
-                        currentMonth + " - " +
-                        currentYear+ " - " +
-                        currentAmount+ " - " +
-                        currentDescription+ " - " +
-                        currentCategory));
-            }
-        } finally {
-
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
-        }
+        //Attach adapter to list view
+        list.setAdapter(adapter);
     }
 
 

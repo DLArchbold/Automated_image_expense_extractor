@@ -50,7 +50,7 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Create a String that contains the SQL statement to create the pets table
+        // Create a String that contains the SQL statement to create the expenses table
         String SQL_CREATE_EXPENSE_TABLE = "CREATE TABLE " + ExpenseEntry.TABLE_NAME + " ("
                 + ExpenseEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + ExpenseEntry.COLUMN_OPTION + " TEXT NOT NULL, "

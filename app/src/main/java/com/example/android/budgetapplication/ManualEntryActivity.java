@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -34,8 +35,11 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.example.android.budgetapplication.data.ExpenseContract;
 import com.example.android.budgetapplication.data.ExpenseDbHelper;
+import com.example.android.budgetapplication.data.ExpenseProvider;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
+
+import java.net.URI;
 import java.util.Calendar;
 
 public class ManualEntryActivity extends AppCompatActivity {
@@ -44,19 +48,23 @@ public class ManualEntryActivity extends AppCompatActivity {
 
 
     private Spinner expenseIncomeOptionSpinner;
-    private EditText day;
-    private EditText month;
-    private EditText year;
+//    private EditText day;
+//    private EditText month;
+//    private EditText year;
     private EditText amount;
     private EditText description;
+    private EditText date;
+    DatePickerDialog datePickerDialog;
     private Spinner expenseIncomeCategorySpinner;
     private Button addButton;
 
     String expenseIncomeOption;
     String expenseIncomeCategory;
 
-
-
+     int yr;
+     int mh;
+     int dy;
+    Uri newUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +77,16 @@ public class ManualEntryActivity extends AppCompatActivity {
 
 
         expenseIncomeOptionSpinner= (Spinner) findViewById(R.id.spinner_expense_income_option);
-        day = (EditText) findViewById(R.id.edit_day);
-        month = (EditText) findViewById(R.id.edit_month);
-        year = (EditText) findViewById(R.id.edit_year);
+//        day = (EditText) findViewById(R.id.edit_day);
+//        month = (EditText) findViewById(R.id.edit_month);
+//        year = (EditText) findViewById(R.id.edit_year);
         amount = (EditText) findViewById(R.id.edit_amount);
         description = (EditText) findViewById(R.id.edit_description);
+        date = findViewById(R.id.date);
         expenseIncomeCategorySpinner= (Spinner) findViewById(R.id.spinner_expense_income_category);
         addButton = findViewById(R.id.button_add);
 
+        setupDatePicker();
         setupExpenseIncomeOptionSpinner();
         setupExpenseIncomeCategorySpinner();
         setupAddButton();
@@ -89,19 +99,24 @@ public class ManualEntryActivity extends AppCompatActivity {
 
         //Read from input fields
         expenseIncomeOption = expenseIncomeOption;
-        int    expenseDay = Integer.parseInt(day.getText().toString());
-        int    expenseMonth = Integer.parseInt(month.getText().toString());
-        int    expenseYear = Integer.parseInt(year.getText().toString());
+        int    expenseDay = dy;
+        int    expenseMonth = mh;
+        int    expenseYear = yr;
+        double expenseAmount;
+        if(amount.getText().toString() == null || amount.getText().toString().isEmpty()){
+            expenseAmount = 0;
+        }else{
+            expenseAmount = Double.parseDouble(amount.getText().toString());
+        }
 
-        double expenseAmount = Double.parseDouble(amount.getText().toString());
         String expenseDescription = description.getText().toString();
         expenseIncomeCategory = expenseIncomeCategory;
 
 
         //Create db helper
-        ExpenseDbHelper mDbHelper = new ExpenseDbHelper(this);
+        //ExpenseDbHelper mDbHelper = new ExpenseDbHelper(this);
 
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+       // SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         // Create a ContentValues object where column names are the keys,
         // and pet attributes from the editor are the values.
@@ -115,16 +130,27 @@ public class ManualEntryActivity extends AppCompatActivity {
         values.put(ExpenseEntry.COLUMN_CATEGORY, expenseIncomeCategory);
 
         // Insert a new row for pet in the database, returning the ID of that new row.
-        long newRowId = db.insert(ExpenseEntry.TABLE_NAME, null, values);
+        //long newRowId = db.insert(ExpenseEntry.TABLE_NAME, null, values);
+
+        // Insert a new row for an expense into the provider using the ContentResolver.
+        // Use the {@link ExpenseEntry#CONTENT_URI} to indicate that we want to insert
+        // into the pets database table.
+        // Receive the new content URI that will allow us to access this record's data in the future.
+        newUri = getContentResolver().insert(ExpenseEntry.CONTENT_URI, values);
 
         // Show a toast message depending on whether or not the insertion was successful
-        if (newRowId == -1) {
-            // If the row ID is -1, then there was an error with insertion.
-            Toast.makeText(this, "Error with saving expense/income", Toast.LENGTH_SHORT).show();
-        } else {
-            // Otherwise, the insertion was successful and we can display a toast with the row ID.
-            Toast.makeText(this, "Expense/income saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
+        if (newUri == null) {
 
+
+
+            // If the neUri is null, then there was an error with insertion.
+            //Toasts created in ExpenseProvider, specific to whether Date/Amount/Description empty
+            //Toast.makeText(this, "Error with saving expense/income", Toast.LENGTH_LONG).show();
+        } else {
+            // Otherwise, the insertion was successful and we can display a toast.
+            String toDisplay = String.valueOf(expenseIncomeOption) + ": " + expenseDescription + " saved successfully.";
+            Toast.makeText(this, toDisplay ,  Toast.LENGTH_LONG).show();
+            finish();//Return to MainActivity
         }
 
 
@@ -144,14 +170,37 @@ public class ManualEntryActivity extends AppCompatActivity {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
                insertExpense();
-               finish();
+
 
             }
         });
     }
 
 
+    private void setupDatePicker(){
+        date.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Calendar calendar = Calendar.getInstance();
+                yr = calendar.get(Calendar.YEAR);
+                mh = calendar.get(Calendar.MONTH);
+                dy = calendar.get(Calendar.DAY_OF_MONTH);
 
+                datePickerDialog = new DatePickerDialog(ManualEntryActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int yrCal, int mhCal, int dyCal) {
+                        yr = yrCal;
+                        mh = mhCal;
+                        dy = dyCal;
+                        String dateToSet = dy + "/" + String.valueOf(Integer.valueOf(mh)+1) + "/" + yr;
+
+                        date.setText(dateToSet);
+                    }
+                }, yr, mh, dy);
+                datePickerDialog.show();
+            }
+        });
+    }
 
     private void setupExpenseIncomeOptionSpinner() {
         // Create adapter for spinner. The list options are from the String array it will use
@@ -184,7 +233,7 @@ public class ManualEntryActivity extends AppCompatActivity {
             // Because AdapterView is an abstract class, onNothingSelected must be defined
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                //mGender = 0; // Unknown
+
             }
         });
     }
@@ -224,76 +273,9 @@ public class ManualEntryActivity extends AppCompatActivity {
             // Because AdapterView is an abstract class, onNothingSelected must be defined
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                //mGender = 0; // Unknown
+
             }
         });
     }
-
-
-
-    public void showDatePickerDialog(View v) {
-
-        DialogFragment newFragment = new DatePickerFragment();
-
-
-        newFragment.show(getSupportFragmentManager(), "datePicker");
-
-
-    }
-
-
-
-
-//ManualEntryActivity.this,
-
-
-
-//
-//    DialogFragment newFragment = new DatePickerDialog.OnDateSetListener() {
-//
-//
-//        @Override
-//        public Dialog onCreateDialog(Bundle savedInstanceState) {
-//            // Use the current date as the default date in the picker
-//            final Calendar c = Calendar.getInstance();
-//            int year = c.get(Calendar.YEAR);
-//            int month = c.get(Calendar.MONTH);
-//            int day = c.get(Calendar.DAY_OF_MONTH);
-//
-//            // Create a new instance of DatePickerDialog and return it
-//            return new DatePickerDialog(ManualEntryActivity.this, this, year, month, day);
-//        }
-//
-//        @Override
-//        public void onDateSet(DatePicker view, int year, int month, int day) {
-//            // Do something with the date chosen by the user
-//
-//
-//        }
-//
-//    };
-
-
-
-
-
-
-
-
-
-//    DialogFragment newFragment = new DatePickerFragment();
-//
-//        newFragment.show(getSupportFragmentManager(), "datePicker");
-//
-//
-//
-//
-//
-//
-//
-//    int ab = ((DatePickerFragment) newFragment).mYear;
-
-
-
 
 }
