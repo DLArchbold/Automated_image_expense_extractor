@@ -39,6 +39,7 @@ public class ExpenseContract {
         public final static String COLUMN_AMOUNT = "amount";
         public final static String COLUMN_DESCRIPTION = "description";
         public final static String COLUMN_CATEGORY = "category";
+        public final static String COLUMN_DATE = "date";
 
 
 

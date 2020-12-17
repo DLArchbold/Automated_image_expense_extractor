@@ -34,7 +34,7 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
     /**
      * Database version. If you change the database schema, you must increment the database version.
      */
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     /**
      * Constructs a new instance of {@link ExpenseDbHelper}.
@@ -59,7 +59,8 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
                 + ExpenseEntry.COLUMN_YEAR + " INTEGER NOT NULL, "
                 + ExpenseEntry.COLUMN_AMOUNT + " DOUBLE(5, 2),"
                 + ExpenseEntry.COLUMN_DESCRIPTION + " TEXT, "
-                + ExpenseEntry.COLUMN_CATEGORY + " TEXT);";
+                + ExpenseEntry.COLUMN_CATEGORY + " TEXT, "
+                +ExpenseEntry.COLUMN_DATE + " TEXT);";
 
         db.execSQL(SQL_CREATE_EXPENSE_TABLE);
 
@@ -69,8 +70,9 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
+        db.execSQL("DROP TABLE IF EXISTS "+ExpenseEntry.TABLE_NAME);
 
+        onCreate(db);
 
-        //Still at vers 1 so no need to upgrades
     }
 }

@@ -38,7 +38,7 @@ import com.example.android.budgetapplication.data.ExpenseDbHelper;
 import com.example.android.budgetapplication.data.ExpenseProvider;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
-
+import android.text.format.DateUtils;
 import java.net.URI;
 import java.util.Calendar;
 
@@ -46,11 +46,8 @@ public class ManualEntryActivity extends AppCompatActivity {
 
 
 
-
+    //UI elements/widgets
     private Spinner expenseIncomeOptionSpinner;
-//    private EditText day;
-//    private EditText month;
-//    private EditText year;
     private EditText amount;
     private EditText description;
     private EditText date;
@@ -58,12 +55,17 @@ public class ManualEntryActivity extends AppCompatActivity {
     private Spinner expenseIncomeCategorySpinner;
     private Button addButton;
 
+    //Field values
     String expenseIncomeOption;
     String expenseIncomeCategory;
-
      int yr;
      int mh;
      int dy;
+    double expenseAmount;
+    String expenseDescription;
+    String fullDate;
+
+     //URI for ContentResolver
     Uri newUri;
 
     @Override
@@ -102,15 +104,17 @@ public class ManualEntryActivity extends AppCompatActivity {
         int    expenseDay = dy;
         int    expenseMonth = mh;
         int    expenseYear = yr;
-        double expenseAmount;
+
         if(amount.getText().toString() == null || amount.getText().toString().isEmpty()){
             expenseAmount = 0;
         }else{
             expenseAmount = Double.parseDouble(amount.getText().toString());
         }
 
-        String expenseDescription = description.getText().toString();
+        expenseDescription = description.getText().toString();
         expenseIncomeCategory = expenseIncomeCategory;
+        fullDate = dy + "-" + mh + "-" + yr;
+
 
 
         //Create db helper
@@ -128,7 +132,7 @@ public class ManualEntryActivity extends AppCompatActivity {
         values.put(ExpenseEntry.COLUMN_AMOUNT, expenseAmount);
         values.put(ExpenseEntry.COLUMN_DESCRIPTION, expenseDescription);
         values.put(ExpenseEntry.COLUMN_CATEGORY, expenseIncomeCategory);
-
+        values.put(ExpenseEntry.COLUMN_DATE, fullDate );
         // Insert a new row for pet in the database, returning the ID of that new row.
         //long newRowId = db.insert(ExpenseEntry.TABLE_NAME, null, values);
 
@@ -190,9 +194,9 @@ public class ManualEntryActivity extends AppCompatActivity {
                     @Override
                     public void onDateSet(DatePicker datePicker, int yrCal, int mhCal, int dyCal) {
                         yr = yrCal;
-                        mh = mhCal;
+                        mh = mhCal+1;
                         dy = dyCal;
-                        String dateToSet = dy + "/" + String.valueOf(Integer.valueOf(mh)+1) + "/" + yr;
+                        String dateToSet = dy + "/" + String.valueOf(Integer.valueOf(mh)) + "/" + yr;
 
                         date.setText(dateToSet);
                     }

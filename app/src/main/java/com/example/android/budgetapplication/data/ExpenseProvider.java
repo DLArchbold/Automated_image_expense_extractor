@@ -22,6 +22,7 @@ public class ExpenseProvider extends ContentProvider {
     private ExpenseDbHelper mDbHelper;
     private static final int EXPENSE = 1;
     private static final int EXPENSE_ID = 2;
+    private static final int EXPENSE_DATE_CATEGORY = 3;
     /** Tag for the log messages */
     public static final String LOG_TAG = ExpenseProvider.class.getSimpleName();
     @Override
@@ -34,6 +35,7 @@ public class ExpenseProvider extends ContentProvider {
     static{
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES, EXPENSE);
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/#", EXPENSE_ID);
+        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" + "/*", EXPENSE_DATE_CATEGORY);
 
     }
 
@@ -52,7 +54,7 @@ public class ExpenseProvider extends ContentProvider {
                 // For the EXPENSE code, query the expense table directly with the given
                 // projection, selection, selection arguments, and sort order. The cursor
                 // could contain multiple rows of the expense table.
-                // TODO: Perform database query on pets table
+                // TODO: Perform database query on expense table
                 cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
@@ -68,8 +70,32 @@ public class ExpenseProvider extends ContentProvider {
                 selection = ExpenseContract.ExpenseEntry._ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
 
-                // This will perform a query on the pets table where the _id equals 3 to return a
+                // This will perform a query on the expenses table where the _id equals x to return a
                 // Cursor containing that row of the table.
+                cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+            case EXPENSE_DATE_CATEGORY:
+                // For the EXPENSE_ID code, extract out the ID from the URI.
+                // For an example URI such as "content://com.example.android.budgetapplication/expense/3",
+                // the selection will be "_id=?" and the selection argument will be a
+                // String array containing the actual ID of 3 in this case.
+                //
+                // For every "?" in the selection, we need to have an element in the selection
+                // arguments that will fill in the "?". Since we have 1 question mark in the
+                // selection, we have 1 String in the selection arguments' String array.
+                selection = ExpenseContract.ExpenseEntry.COLUMN_DATE + "=? " + "AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "=?";
+                String strUri = uri.toString();
+                //get expenses/date/category
+                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length() );
+                //get date/category
+                strUri = strUri.substring(strUri.indexOf("/")+1);
+                // {date, category}
+                selectionArgs = strUri.split("/");
+
+
+                // This will perform a query on the expenses table where the date and expense/income category equals the
+                // selectionArgs to return a Cursor containing rows of the table.
                 cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
