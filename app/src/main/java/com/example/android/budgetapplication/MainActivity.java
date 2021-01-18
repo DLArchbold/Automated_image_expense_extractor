@@ -30,6 +30,7 @@ import android.view.Menu;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
 import java.util.ArrayList;
@@ -71,26 +72,24 @@ public class MainActivity extends AppCompatActivity
         });
 
 
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar,  R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
         //Display all database records
-            displayDatabaseInfo();
+        displayDatabaseInfo();
 
     }
+
     @Override
     protected void onStart() {
         super.onStart();
         displayDatabaseInfo();
     }
-
-
 
 
     private void displayDatabaseInfo() {
@@ -110,14 +109,14 @@ public class MainActivity extends AppCompatActivity
         //Columns to retrieve during query
         String[] projection = {
                 ExpenseEntry._ID,
-         ExpenseEntry.COLUMN_OPTION,
-        ExpenseEntry.COLUMN_DAY,
-        ExpenseEntry.COLUMN_MONTH,
-        ExpenseEntry.COLUMN_YEAR,
-        ExpenseEntry.COLUMN_AMOUNT,
-        ExpenseEntry.COLUMN_DESCRIPTION,
-        ExpenseEntry.COLUMN_CATEGORY,
-        ExpenseEntry.COLUMN_DATE
+                ExpenseEntry.COLUMN_OPTION,
+                ExpenseEntry.COLUMN_DAY,
+                ExpenseEntry.COLUMN_MONTH,
+                ExpenseEntry.COLUMN_YEAR,
+                ExpenseEntry.COLUMN_AMOUNT,
+                ExpenseEntry.COLUMN_DESCRIPTION,
+                ExpenseEntry.COLUMN_CATEGORY,
+                ExpenseEntry.COLUMN_DATE
         };
 
 
@@ -137,10 +136,8 @@ public class MainActivity extends AppCompatActivity
 //        }
 
 
-
-
-         Cursor cursor = getContentResolver().query(
-              ExpenseEntry.CONTENT_URI,
+        Cursor cursor = getContentResolver().query(
+                ExpenseEntry.CONTENT_URI,
                 projection,
                 null,
                 null,
@@ -148,20 +145,19 @@ public class MainActivity extends AppCompatActivity
 
         );
 
-         //Extract all unique dates from expenses table for data header for "Day" view
+        //Extract all unique dates from expenses table for data header for "Day" view
         //Map each list header to a list of child data (expense/income categories)
-        List<String> expenseIncomeCategory = Arrays.asList(getResources().getStringArray( R.array.array_expense_income_category));
+        List<String> expenseIncomeCategory = Arrays.asList(getResources().getStringArray(R.array.array_expense_income_category));
         HashSet<String> uniqueDates = new HashSet<>();
-        while(cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             int dateColIdx = cursor.getColumnIndex(ExpenseEntry.COLUMN_DATE);
             String curCursorDate = cursor.getString(dateColIdx);
-            if(!uniqueDates.contains(curCursorDate)){
+            if (!uniqueDates.contains(curCursorDate)) {
                 listDataHeader.add(curCursorDate);
                 listDataChild.put(curCursorDate, expenseIncomeCategory);
             }
-           uniqueDates.add(curCursorDate);
+            uniqueDates.add(curCursorDate);
         }
-
 
 
         //ExpandableListView to populate, use ExapandableListAdapter
@@ -179,7 +175,7 @@ public class MainActivity extends AppCompatActivity
 //        list.setAdapter(adapter);
 
         //2 level ExpandableListView to populate, use ParentLevelAdapter and SecondLevelAddapter
-        Map<String, Map<String, Cursor>> dateCatExpense =  getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection);
+        Map<String, Map<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection);
 
         // Init top level data
         //Top levl data is uniqueDate
@@ -192,7 +188,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private  Map<String, Map<String, Cursor>> getDateCategoryData(Set<String> uniqueDates, List<String> expenseIncomeCategory, Cursor cursor, String[] projection){
+    private Map<String, Map<String, Cursor>> getDateCategoryData(Set<String> uniqueDates, List<String> expenseIncomeCategory, Cursor cursor, String[] projection) {
 
         //Get Expenses for each category for each date
         /*
@@ -223,12 +219,12 @@ public class MainActivity extends AppCompatActivity
 
 
         //For all unique dates
-        for(String uniqueDate : uniqueDates){
+        for (String uniqueDate : uniqueDates) {
 
 
             //For each expense/income category, get data from db query
             Map<String, Cursor> oneDateCategoriesExpenses = new HashMap<>();
-            for(String category : expenseIncomeCategory){
+            for (String category : expenseIncomeCategory) {
                 String path = "/" + uniqueDate + "/" + category;
                 cursor = getContentResolver().query(
                         Uri.withAppendedPath(ExpenseEntry.CONTENT_URI, path),
@@ -239,7 +235,7 @@ public class MainActivity extends AppCompatActivity
 
                 );
 
-                if(cursor.getCount()>0){
+                if (cursor.getCount() > 0) {
                     Log.e("MainActvity", String.valueOf("num of rows" + cursor.getCount()) + " " + uniqueDate + " " + category);
                     //1st loop
                     // Bills ----> Bill expense/income 1 for 30/10/2020
@@ -263,8 +259,6 @@ public class MainActivity extends AppCompatActivity
 
         return dateCatExpense;
     }
-
-
 
 
     @Override
@@ -295,11 +289,11 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        }else if (id == R.id.action_manual){
+        } else if (id == R.id.action_manual) {
 
             Intent ManualEntryIntent = new Intent(MainActivity.this, ManualEntryActivity.class);
             startActivity(ManualEntryIntent);
-        }else if (id == R.id.action_image_recognition){
+        } else if (id == R.id.action_image_recognition) {
 
             Intent ImageRecognitionEntryIntent = new Intent(MainActivity.this, ImageRecognitionEntryActivity.class);
             startActivity(ImageRecognitionEntryIntent);
@@ -333,9 +327,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
-
 
 
 }
