@@ -28,8 +28,10 @@ public class SecondLevelAdapter extends BaseExpandableListAdapter
     public SecondLevelAdapter(Context mContext, List<String> mListDataHeader,
                               Map<String, Cursor> mListDataChild, Map<String, Cursor> dateCatExpense) {
         this.mContext = mContext;
+        //mListDataHeader is valid categories for 1 date
         this.mListDataHeader = mListDataHeader;
         this.mListDataChild = mListDataChild;
+        //dateCatExpense here is the categories->cursors map for 1 date
         this.dateCatExpense = dateCatExpense;
     }
     @Override

@@ -23,6 +23,9 @@ public class ExpenseProvider extends ContentProvider {
     private static final int EXPENSE = 1;
     private static final int EXPENSE_ID = 2;
     private static final int EXPENSE_DATE_CATEGORY = 3;
+    private static final int EXPENSES_OR_INCOME_ONLY = 4;
+    private static final int DATE_CATEGORY_OPTION = 5;
+    //private static final int INCOME_ONLY = 5;
     /** Tag for the log messages */
     public static final String LOG_TAG = ExpenseProvider.class.getSimpleName();
     @Override
@@ -36,7 +39,9 @@ public class ExpenseProvider extends ContentProvider {
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES, EXPENSE);
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/#", EXPENSE_ID);
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" + "/*", EXPENSE_DATE_CATEGORY);
-
+        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" , EXPENSES_OR_INCOME_ONLY);
+        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" + "/*" + "/*" , DATE_CATEGORY_OPTION);
+        //sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" , INCOME_ONLY);
     }
 
 
@@ -48,6 +53,7 @@ public class ExpenseProvider extends ContentProvider {
         // This cursor will hold the result of the query
         Cursor cursor;
         // Figure out if the URI matcher can match the URI to a specific code
+        String strUri = uri.toString();
         int match = sUriMatcher.match(uri);
         switch (match) {
             case EXPENSE:
@@ -85,7 +91,7 @@ public class ExpenseProvider extends ContentProvider {
                 // arguments that will fill in the "?". Since we have 1 question mark in the
                 // selection, we have 1 String in the selection arguments' String array.
                 selection = ExpenseContract.ExpenseEntry.COLUMN_DATE + "=? " + "AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "=?";
-                String strUri = uri.toString();
+
                 //get expenses/date/category
                 strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length() );
                 //get date/category
@@ -96,6 +102,31 @@ public class ExpenseProvider extends ContentProvider {
 
                 // This will perform a query on the expenses table where the date and expense/income category equals the
                 // selectionArgs to return a Cursor containing rows of the table.
+                cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+            case EXPENSES_OR_INCOME_ONLY:
+                selection = ExpenseContract.ExpenseEntry.COLUMN_OPTION + "=? " ;
+
+                // {option}
+                selectionArgs = new String[]{strUri.substring(strUri.lastIndexOf("/")+1)};
+                // This will perform a query on the expenses table where the date and expense/income category equals the
+                // selectionArgs to return a Cursor containing rows of the table.
+                cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+            case DATE_CATEGORY_OPTION:
+                selection = ExpenseContract.ExpenseEntry.COLUMN_DATE + "=? " + "AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "=?"+ "AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "=?";
+
+
+                //get expenses/date/category/option
+                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length() );
+                //get date/category/option
+                strUri = strUri.substring(strUri.indexOf("/")+1);
+                // {date, category, option}
+                selectionArgs = strUri.split("/");
+                // This will perform a query on the expenses table where the {date, expense/income category and
+                // option} equals the selectionArgs to return a Cursor containing rows of the table.
                 cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;

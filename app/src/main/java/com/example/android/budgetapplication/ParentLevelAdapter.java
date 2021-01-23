@@ -43,11 +43,12 @@ public class ParentLevelAdapter extends BaseExpandableListAdapter  {
         mListData_SecondLevel_Map = new HashMap<>();
         int parentCount = mListDataHeader.size();
         for (int i = 0; i < parentCount; i++) {
-            //Get one unique date per iteration
+            //Get one unique date per iteration, content is a unique date
             String content = mListDataHeader.get(i);
+            //Get valid categories per unique date
             List<String> uniqueDatesList = new ArrayList<>();
             uniqueDatesList.addAll(dateCatExpense.get(content).keySet());
-            //Match date with categories that have data
+            //Map Date and valid categories in mListData_SecondLevel_Map
             mListData_SecondLevel_Map.put(content, uniqueDatesList);
         }
         // THIRD LEVEL

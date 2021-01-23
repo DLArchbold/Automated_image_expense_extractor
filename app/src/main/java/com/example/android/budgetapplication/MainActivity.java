@@ -2,6 +2,7 @@ package com.example.android.budgetapplication;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,6 +26,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import android.view.Menu;
 import android.widget.ExpandableListView;
@@ -39,6 +42,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -47,7 +53,9 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    private ViewPager mSlideViewPager;
+    private TextView mDotLayout;
+    private SliderAdapter sliderAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,19 +65,19 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-
-                Intent wayIntent = new Intent(MainActivity.this, WayActivity.class);
-
-                startActivity(wayIntent);
-
-            }
-        });
+//        FloatingActionButton fab = findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+////                        .setAction("Action", null).show();
+//
+//                Intent wayIntent = new Intent(MainActivity.this, WayActivity.class);
+//
+//                startActivity(wayIntent);
+//
+//            }
+//        });
 
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -79,6 +87,7 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+
 
         //Display all database records
         displayDatabaseInfo();
@@ -95,8 +104,8 @@ public class MainActivity extends AppCompatActivity
     private void displayDatabaseInfo() {
 
         ExpandableListAdapter listAdapter;
-        List<String> listDataHeader = new ArrayList<>();
-        HashMap<String, List<String>> listDataChild = new HashMap<>();
+//        List<String> listDataHeader = new ArrayList<>();
+//        HashMap<String, List<String>> listDataChild = new HashMap<>();
 
 //      No need to get ExpenseDbHelper when using ContentResolver and ContentProvider
 //        // To access our database, we instantiate our subclass of SQLiteOpenHelper
@@ -136,23 +145,204 @@ public class MainActivity extends AppCompatActivity
 //        }
 
 
+////        Cursor cursor = getContentResolver().query(
+////                ExpenseEntry.CONTENT_URI,
+////                projection,
+////                null,
+////                null,
+////                ExpenseEntry.COLUMN_YEAR + " DESC,  " + ExpenseEntry.COLUMN_MONTH + " DESC, " + ExpenseEntry.COLUMN_DAY + " DESC"
+////
+////        );
+//
+//        Cursor cursor = getContentResolver().query(
+//                Uri.withAppendedPath(ExpenseEntry.CONTENT_URI, "Income"),
+//                projection,
+//                null,
+//                null,
+//                ExpenseEntry.COLUMN_YEAR + " ASC,  " + ExpenseEntry.COLUMN_MONTH + " ASC, " + ExpenseEntry.COLUMN_DAY + " ASC"
+//
+//        );
+//
+//        //Extract all unique dates from expenses table for data header for "Day" view
+//        //Map each list header to a list of child data (expense/income categories)
+//        List<String> expenseIncomeCategory = Arrays.asList(getResources().getStringArray(R.array.array_expense_income_category));
+//        LinkedHashSet<String> uniqueDates = new LinkedHashSet<>();
+//        while (cursor.moveToNext()) {
+//            int dateColIdx = cursor.getColumnIndex(ExpenseEntry.COLUMN_DATE);
+//            String curCursorDate = cursor.getString(dateColIdx);
+//
+//            if (!uniqueDates.contains(curCursorDate)) {
+//
+//                listDataHeader.add(curCursorDate);
+//                listDataChild.put(curCursorDate, expenseIncomeCategory);
+//            }
+//            uniqueDates.add(curCursorDate);
+//        }
+//
+//
+//        //ExpandableListView to populate, use ExapandableListAdapter
+////        ExpandableListView list = (ExpandableListView)findViewById(R.id.list);
+////        listAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
+////        list.setAdapter(listAdapter);
+//
+//
+////        //List view to populate, use CursorAdapter
+////        ListView list = (ListView)findViewById(R.id.list);
+////        //Adapter to create list item view for each row of data in cursor
+////        ExpenseCursorAdapter adapter = new ExpenseCursorAdapter(this, cursor);
+////
+////        //Attach adapter to list view
+////        list.setAdapter(adapter);
+//
+//
+//
+////        //2 level ExpandableListView to populate, use ParentLevelAdapter and SecondLevelAddapter
+////        Map<String, Map<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection);
+////
+////        // Init top level data
+////        //Top levl data is uniqueDate
+////        ExpandableListView mExpandableListView = (ExpandableListView) findViewById(R.id.list);
+////        if (mExpandableListView != null) {
+////            //pass list of unique dates as listDataHeader
+////            ParentLevelAdapter parentLevelAdapter = new ParentLevelAdapter(this, listDataHeader, dateCatExpense);
+////            mExpandableListView.setAdapter(parentLevelAdapter);
+////        }
+//
+//
+//
+//        /////////////////////////Adding ViewPager//////////////////////////////////////
+//
+//
+//
+//        //Array of OneLevelExpenseAdapters to store categories->expenses for 1 date and page for each array element
+//        OneLevelExpenseAdapter [] pageAdapters = new OneLevelExpenseAdapter[uniqueDates.size()];
+//        //dateCatExpense contains Dates->Categories->Cursors
+//        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection);
+//        //Create an array of OneLevelExpenseAdapter objects for all dateCatExpense entries for each page's ExpandableListView
+//        Iterator<LinkedHashMap.Entry<String, LinkedHashMap<String, Cursor>>> iterator = dateCatExpense.entrySet().iterator();
+//        int ctr =0;
+//        while(iterator.hasNext()){
+//            //Move to next date->category->expenses map entry then get the categories->expenses
+//            Map<String, Cursor> catsExpenses = iterator.next().getValue();
+//            Object[] validCatArr = catsExpenses.keySet().toArray();
+//
+//            List<String> validCategories = new ArrayList<String>();
+//            String valCatArray [] = Arrays.copyOf(validCatArr, validCatArr.length, String[].class);
+//            List<String> validCatList = Arrays.asList(valCatArray);
+//
+//
+//            pageAdapters[ctr] = new OneLevelExpenseAdapter(this, validCatList, catsExpenses);
+//            ctr++;
+//        }
+
+
+        //Unique dates and their would be idx on 2d array that contains income/expense Adapters
+        HashMap<String, Integer> datePosition =  mapDatesToIdx();
+
+        //Obtain expense and income adapters corresponding to their day
+        OneLevelExpenseAdapter[][] expenseIncomePageAdapters = new OneLevelExpenseAdapter[2][mapDatesToIdx().keySet().size()];
+        expenseIncomePageAdapters= getIncomeOrExpenseAdapter("Expense", datePosition, expenseIncomePageAdapters);
+        expenseIncomePageAdapters = getIncomeOrExpenseAdapter("Income", datePosition,expenseIncomePageAdapters );
+
+        //Split expense and income adapters
+        OneLevelExpenseAdapter[] expensePageAdapters = expenseIncomePageAdapters[0];
+        OneLevelExpenseAdapter[] incomePageAdapters = expenseIncomePageAdapters[1];
+
+        //Assign SliderAdapter to ViewPager after readying data in SliderAdapter
+        mSlideViewPager = (ViewPager) findViewById(R.id.slideViewPager);
+        sliderAdapter = new SliderAdapter(this, expensePageAdapters, incomePageAdapters);
+        mSlideViewPager.setAdapter(sliderAdapter);
+        //view pager start on last page for
+        mSlideViewPager.setCurrentItem(Math.max(expensePageAdapters.length, incomePageAdapters.length));
+
+    }
+
+    private HashMap<String, Integer> mapDatesToIdx (){
+
+        String[] projection = {
+                ExpenseEntry._ID,
+                ExpenseEntry.COLUMN_OPTION,
+                ExpenseEntry.COLUMN_DAY,
+                ExpenseEntry.COLUMN_MONTH,
+                ExpenseEntry.COLUMN_YEAR,
+                ExpenseEntry.COLUMN_AMOUNT,
+                ExpenseEntry.COLUMN_DESCRIPTION,
+                ExpenseEntry.COLUMN_CATEGORY,
+                ExpenseEntry.COLUMN_DATE
+        };
+
         Cursor cursor = getContentResolver().query(
                 ExpenseEntry.CONTENT_URI,
                 projection,
                 null,
                 null,
-                ExpenseEntry.COLUMN_YEAR + " DESC,  " + ExpenseEntry.COLUMN_MONTH + " DESC, " + ExpenseEntry.COLUMN_DAY + " DESC"
+                ExpenseEntry.COLUMN_YEAR + " ASC,  " + ExpenseEntry.COLUMN_MONTH + " ASC, " + ExpenseEntry.COLUMN_DAY + " ASC"
+
+        );
+
+        //Extract all unique dates from expenses table for data header for "Day" view
+        //Map each list header to a list of child data (expense/income categories)
+        int pos = 0;
+        HashMap<String, Integer> datePos = new HashMap<String, Integer>();
+        while (cursor.moveToNext()) {
+            int dateColIdx = cursor.getColumnIndex(ExpenseEntry.COLUMN_DATE);
+            String curCursorDate = cursor.getString(dateColIdx);
+
+            if (!datePos.containsKey(curCursorDate)) {
+                datePos.put(curCursorDate, pos++ );
+            }
+
+        }
+
+        return datePos;
+
+    }
+
+    private OneLevelExpenseAdapter[][] getIncomeOrExpenseAdapter(String expenseOrIncome, HashMap<String, Integer> datePosition, OneLevelExpenseAdapter[][] expenseIncomePageAdapters){
+
+        List<String> listDataHeader = new ArrayList<>();
+        HashMap<String, List<String>> listDataChild = new HashMap<>();
+//        Cursor cursor = getContentResolver().query(
+//                ExpenseEntry.CONTENT_URI,
+//                projection,
+//                null,
+//                null,
+//                ExpenseEntry.COLUMN_YEAR + " DESC,  " + ExpenseEntry.COLUMN_MONTH + " DESC, " + ExpenseEntry.COLUMN_DAY + " DESC"
+//
+//        );
+
+        //Columns to retrieve during query
+        String[] projection = {
+                ExpenseEntry._ID,
+                ExpenseEntry.COLUMN_OPTION,
+                ExpenseEntry.COLUMN_DAY,
+                ExpenseEntry.COLUMN_MONTH,
+                ExpenseEntry.COLUMN_YEAR,
+                ExpenseEntry.COLUMN_AMOUNT,
+                ExpenseEntry.COLUMN_DESCRIPTION,
+                ExpenseEntry.COLUMN_CATEGORY,
+                ExpenseEntry.COLUMN_DATE
+        };
+
+        Cursor cursor = getContentResolver().query(
+                Uri.withAppendedPath(ExpenseEntry.CONTENT_URI, expenseOrIncome),
+                projection,
+                null,
+                null,
+                ExpenseEntry.COLUMN_YEAR + " ASC,  " + ExpenseEntry.COLUMN_MONTH + " ASC, " + ExpenseEntry.COLUMN_DAY + " ASC"
 
         );
 
         //Extract all unique dates from expenses table for data header for "Day" view
         //Map each list header to a list of child data (expense/income categories)
         List<String> expenseIncomeCategory = Arrays.asList(getResources().getStringArray(R.array.array_expense_income_category));
-        HashSet<String> uniqueDates = new HashSet<>();
+        LinkedHashSet<String> uniqueDates = new LinkedHashSet<>();
         while (cursor.moveToNext()) {
             int dateColIdx = cursor.getColumnIndex(ExpenseEntry.COLUMN_DATE);
             String curCursorDate = cursor.getString(dateColIdx);
+
             if (!uniqueDates.contains(curCursorDate)) {
+
                 listDataHeader.add(curCursorDate);
                 listDataChild.put(curCursorDate, expenseIncomeCategory);
             }
@@ -174,21 +364,62 @@ public class MainActivity extends AppCompatActivity
 //        //Attach adapter to list view
 //        list.setAdapter(adapter);
 
-        //2 level ExpandableListView to populate, use ParentLevelAdapter and SecondLevelAddapter
-        Map<String, Map<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection);
 
-        // Init top level data
-        //Top levl data is uniqueDate
-        ExpandableListView mExpandableListView = (ExpandableListView) findViewById(R.id.list);
-        if (mExpandableListView != null) {
-            //pass list of unique dates as listDataHeader
-            ParentLevelAdapter parentLevelAdapter = new ParentLevelAdapter(this, listDataHeader, dateCatExpense);
-            mExpandableListView.setAdapter(parentLevelAdapter);
+
+//        //2 level ExpandableListView to populate, use ParentLevelAdapter and SecondLevelAddapter
+//        Map<String, Map<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection);
+//
+//        // Init top level data
+//        //Top levl data is uniqueDate
+//        ExpandableListView mExpandableListView = (ExpandableListView) findViewById(R.id.list);
+//        if (mExpandableListView != null) {
+//            //pass list of unique dates as listDataHeader
+//            ParentLevelAdapter parentLevelAdapter = new ParentLevelAdapter(this, listDataHeader, dateCatExpense);
+//            mExpandableListView.setAdapter(parentLevelAdapter);
+//        }
+
+
+
+        /////////////////////////Adding ViewPager//////////////////////////////////////
+
+
+
+        //Array of OneLevelExpenseAdapters to store categories->expenses for 1 date and page for each array element
+        OneLevelExpenseAdapter [] pageAdapters = new OneLevelExpenseAdapter[uniqueDates.size()];
+        //dateCatExpense contains Dates->Categories->Cursors
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection, expenseOrIncome);
+        //Create an array of OneLevelExpenseAdapter objects for all dateCatExpense entries for each page's ExpandableListView
+        Iterator<LinkedHashMap.Entry<String, LinkedHashMap<String, Cursor>>> iterator = dateCatExpense.entrySet().iterator();
+        int ctr =0;
+        while(iterator.hasNext()){
+            //Move to next date->category->expenses map entry then get the categories->expenses
+            String curDate = iterator.next().getKey();
+            LinkedHashMap<String, Cursor> catsExpenses = dateCatExpense.get(curDate);
+            Object[] validCatArr = catsExpenses.keySet().toArray();
+
+            //Create 1 adapter for 1 page which rep. 1 day's expense/income
+            List<String> validCategories = new ArrayList<String>();
+            String valCatArray [] = Arrays.copyOf(validCatArr, validCatArr.length, String[].class);
+            List<String> validCatList = Arrays.asList(valCatArray);
+            pageAdapters[ctr] = new OneLevelExpenseAdapter(this, validCatList, catsExpenses);
+
+            //Expense pageAdapters fill column 0, while income page adapters fill column 1. Each row represents a day.
+            //which may have either or both expenses/income
+            int curDatePosition = datePosition.get(curDate);
+            if(expenseOrIncome.equals("Expense")){
+                expenseIncomePageAdapters[0][curDatePosition] = pageAdapters[ctr];
+            }else{ //if it's income
+                expenseIncomePageAdapters[1][curDatePosition] = pageAdapters[ctr];
+            }
+
+            ctr++;
         }
-
+        return expenseIncomePageAdapters;
     }
 
-    private Map<String, Map<String, Cursor>> getDateCategoryData(Set<String> uniqueDates, List<String> expenseIncomeCategory, Cursor cursor, String[] projection) {
+
+    private LinkedHashMap<String, LinkedHashMap<String, Cursor>> getDateCategoryData(Set<String> uniqueDates, List<String> expenseIncomeCategory, Cursor cursor,
+                                                                                     String[] projection, String expenseOrIncome) {
 
         //Get Expenses for each category for each date
         /*
@@ -214,18 +445,15 @@ public class MainActivity extends AppCompatActivity
                                 .
                             //end map}
          */
-
-        Map<String, Map<String, Cursor>> dateCatExpense = new HashMap<>();
-
-
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = new  LinkedHashMap<String, LinkedHashMap<String, Cursor>>();
         //For all unique dates
         for (String uniqueDate : uniqueDates) {
 
 
             //For each expense/income category, get data from db query
-            Map<String, Cursor> oneDateCategoriesExpenses = new HashMap<>();
+            LinkedHashMap<String, Cursor> oneDateCategoriesExpenses = new LinkedHashMap<>();
             for (String category : expenseIncomeCategory) {
-                String path = "/" + uniqueDate + "/" + category;
+                String path = "/" + uniqueDate + "/" + category + "/" + expenseOrIncome;
                 cursor = getContentResolver().query(
                         Uri.withAppendedPath(ExpenseEntry.CONTENT_URI, path),
                         projection,

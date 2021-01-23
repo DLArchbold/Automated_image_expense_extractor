@@ -108,7 +108,12 @@ public class ManualEntryActivity extends AppCompatActivity {
         if(amount.getText().toString() == null || amount.getText().toString().isEmpty()){
             expenseAmount = 0;
         }else{
-            expenseAmount = Double.parseDouble(amount.getText().toString());
+            if(expenseIncomeOption.equals("Expense")){
+                expenseAmount = -Double.parseDouble(amount.getText().toString());
+            }else{
+                expenseAmount = Double.parseDouble(amount.getText().toString());
+            }
+
         }
 
         expenseDescription = description.getText().toString();
@@ -123,7 +128,7 @@ public class ManualEntryActivity extends AppCompatActivity {
        // SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         // Create a ContentValues object where column names are the keys,
-        // and pet attributes from the editor are the values.
+        // and expense attributes from the editor are the values.
         ContentValues values = new ContentValues();
         values.put(ExpenseEntry.COLUMN_OPTION, expenseIncomeOption);
         values.put(ExpenseEntry.COLUMN_DAY, expenseDay);
@@ -133,7 +138,7 @@ public class ManualEntryActivity extends AppCompatActivity {
         values.put(ExpenseEntry.COLUMN_DESCRIPTION, expenseDescription);
         values.put(ExpenseEntry.COLUMN_CATEGORY, expenseIncomeCategory);
         values.put(ExpenseEntry.COLUMN_DATE, fullDate );
-        // Insert a new row for pet in the database, returning the ID of that new row.
+        // Insert a new row for expense in the database, returning the ID of that new row.
         //long newRowId = db.insert(ExpenseEntry.TABLE_NAME, null, values);
 
         // Insert a new row for an expense into the provider using the ContentResolver.
