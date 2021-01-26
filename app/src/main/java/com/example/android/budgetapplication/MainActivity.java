@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import com.example.android.budgetapplication.data.ExpenseContract;
 import com.example.android.budgetapplication.data.ExpenseDbHelper;
+import com.example.android.budgetapplication.data.ExpenseProvider;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -238,6 +239,7 @@ public class MainActivity extends AppCompatActivity
 
         //Unique dates and their would be idx on 2d array that contains income/expense Adapters
         HashMap<String, Integer> datePosition =  mapDatesToIdx();
+        HashMap<Integer, String> idxDate = mapIdxToDates(datePosition);
 
         //Obtain expense and income adapters corresponding to their day
         OneLevelExpenseAdapter[][] expenseIncomePageAdapters = new OneLevelExpenseAdapter[2][mapDatesToIdx().keySet().size()];
@@ -250,11 +252,19 @@ public class MainActivity extends AppCompatActivity
 
         //Assign SliderAdapter to ViewPager after readying data in SliderAdapter
         mSlideViewPager = (ViewPager) findViewById(R.id.slideViewPager);
-        sliderAdapter = new SliderAdapter(this, expensePageAdapters, incomePageAdapters);
+        sliderAdapter = new SliderAdapter(this, expensePageAdapters, incomePageAdapters, idxDate);
         mSlideViewPager.setAdapter(sliderAdapter);
         //view pager start on last page for
         mSlideViewPager.setCurrentItem(Math.max(expensePageAdapters.length, incomePageAdapters.length));
 
+    }
+
+    private HashMap<Integer, String> mapIdxToDates(HashMap<String, Integer> mapDatesToIdx){
+        HashMap<Integer, String> idxToDates = new HashMap<>();
+        for(String date:mapDatesToIdx.keySet()){
+            idxToDates.put(mapDatesToIdx.get(date), date);
+        }
+        return idxToDates;
     }
 
     private HashMap<String, Integer> mapDatesToIdx (){
@@ -387,21 +397,26 @@ public class MainActivity extends AppCompatActivity
         //Array of OneLevelExpenseAdapters to store categories->expenses for 1 date and page for each array element
         OneLevelExpenseAdapter [] pageAdapters = new OneLevelExpenseAdapter[uniqueDates.size()];
         //dateCatExpense contains Dates->Categories->Cursors
-        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection, expenseOrIncome);
+        Object[] dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection, expenseOrIncome);
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> catExpense =  (LinkedHashMap<String, LinkedHashMap<String, Cursor>>) dateCatExpense[0];
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> catSum =  (LinkedHashMap<String, LinkedHashMap<String, Cursor>>) dateCatExpense[1];
+        //LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection, expenseOrIncome);
         //Create an array of OneLevelExpenseAdapter objects for all dateCatExpense entries for each page's ExpandableListView
-        Iterator<LinkedHashMap.Entry<String, LinkedHashMap<String, Cursor>>> iterator = dateCatExpense.entrySet().iterator();
+        Iterator<LinkedHashMap.Entry<String, LinkedHashMap<String, Cursor>>> iteratorCatExpense = catExpense.entrySet().iterator();
+        Iterator<LinkedHashMap.Entry<String, LinkedHashMap<String, Cursor>>> iteratorCatSum = catSum.entrySet().iterator();
         int ctr =0;
-        while(iterator.hasNext()){
+        while(iteratorCatExpense.hasNext() && iteratorCatSum.hasNext()){
             //Move to next date->category->expenses map entry then get the categories->expenses
-            String curDate = iterator.next().getKey();
-            LinkedHashMap<String, Cursor> catsExpenses = dateCatExpense.get(curDate);
+            String curDate = iteratorCatExpense.next().getKey();
+            LinkedHashMap<String, Cursor> catsExpenses = catExpense.get(curDate);
             Object[] validCatArr = catsExpenses.keySet().toArray();
+            LinkedHashMap<String, Cursor> catsSum = catSum.get(curDate);
 
             //Create 1 adapter for 1 page which rep. 1 day's expense/income
             List<String> validCategories = new ArrayList<String>();
             String valCatArray [] = Arrays.copyOf(validCatArr, validCatArr.length, String[].class);
             List<String> validCatList = Arrays.asList(valCatArray);
-            pageAdapters[ctr] = new OneLevelExpenseAdapter(this, validCatList, catsExpenses);
+            pageAdapters[ctr] = new OneLevelExpenseAdapter(this, validCatList, catsExpenses, catsSum);
 
             //Expense pageAdapters fill column 0, while income page adapters fill column 1. Each row represents a day.
             //which may have either or both expenses/income
@@ -418,8 +433,9 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private LinkedHashMap<String, LinkedHashMap<String, Cursor>> getDateCategoryData(Set<String> uniqueDates, List<String> expenseIncomeCategory, Cursor cursor,
-                                                                                     String[] projection, String expenseOrIncome) {
+    private Object[]
+    getDateCategoryData(Set<String> uniqueDates, List<String> expenseIncomeCategory,
+                        Cursor cursor, String[] projection, String expenseOrIncome) {
 
         //Get Expenses for each category for each date
         /*
@@ -445,13 +461,30 @@ public class MainActivity extends AppCompatActivity
                                 .
                             //end map}
          */
-        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = new  LinkedHashMap<String, LinkedHashMap<String, Cursor>>();
+
+//        String[] projection = {
+//                ExpenseEntry._ID,
+//                ExpenseEntry.COLUMN_OPTION,
+//                ExpenseEntry.COLUMN_DAY,
+//                ExpenseEntry.COLUMN_MONTH,
+//                ExpenseEntry.COLUMN_YEAR,
+//                ExpenseEntry.COLUMN_AMOUNT,
+//                ExpenseEntry.COLUMN_DESCRIPTION,
+//                ExpenseEntry.COLUMN_CATEGORY,
+//                ExpenseEntry.COLUMN_DATE
+//        };
+
+        String[] sumProjection =  { "sum(" + ExpenseEntry.COLUMN_AMOUNT  + ")"};
+        Cursor sumCursor;
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = new  LinkedHashMap <String, LinkedHashMap<String, Cursor>>();
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>>  dateCatOptionSum = new LinkedHashMap<String, LinkedHashMap<String, Cursor>>();
         //For all unique dates
         for (String uniqueDate : uniqueDates) {
 
 
             //For each expense/income category, get data from db query
             LinkedHashMap<String, Cursor> oneDateCategoriesExpenses = new LinkedHashMap<>();
+            LinkedHashMap<String, Cursor> oneDateCategoriesOptionSum = new LinkedHashMap<>();
             for (String category : expenseIncomeCategory) {
                 String path = "/" + uniqueDate + "/" + category + "/" + expenseOrIncome;
                 cursor = getContentResolver().query(
@@ -463,8 +496,26 @@ public class MainActivity extends AppCompatActivity
 
                 );
 
-                if (cursor.getCount() > 0) {
+                //Get sum for individual category and option
+                sumCursor = getContentResolver().query(
+                        Uri.withAppendedPath(ExpenseEntry.CONTENT_URI, path),
+                        sumProjection,
+                        null,
+                        null,
+                        null
+
+                );
+//                sumCursor.moveToNext();
+//                int sumColumnIndex = sumCursor.getColumnIndex(sumCursor.getColumnName(0));
+//                System.out.println(sumCursor.getCount() + " "+ sumColumnIndex);
+//                String sum = sumCursor.getString(sumColumnIndex);
+//                System.out.println("sumCursor print: " +" sum: " + sum + " uniqueDate: " + uniqueDate + " category: " + category + " expenseOrIncome: "
+//                + expenseOrIncome);
+
+
+                if (cursor.getCount() > 0 && sumCursor.getCount()>0) {
                     Log.e("MainActvity", String.valueOf("num of rows" + cursor.getCount()) + " " + uniqueDate + " " + category);
+                    //For 1 date
                     //1st loop
                     // Bills ----> Bill expense/income 1 for 30/10/2020
 //                            ----> Bill expense/income 2 for 30/10/2020
@@ -476,6 +527,10 @@ public class MainActivity extends AppCompatActivity
                     //
                     oneDateCategoriesExpenses.put(category, cursor);
 
+                    //For 1 date
+                    //Bills(expenses/income) -> sum
+                    //Transport (expenses/income)->sum
+                    oneDateCategoriesOptionSum.put(category, sumCursor);
                 }
 
 
@@ -483,9 +538,17 @@ public class MainActivity extends AppCompatActivity
 
             //map date to list of categories and their respective expense/income data
             dateCatExpense.put(uniqueDate, oneDateCategoriesExpenses);
+            //For each date
+            //Date 1-> Bills(expenses/income)->sum
+            //         ->Transport (expenses/income) ->sum)
+            //Date 2-> Bills(expenses/income)->sum
+            //         ->Transport (expenses/income) ->sum)
+            dateCatOptionSum.put(uniqueDate, oneDateCategoriesOptionSum);
         }
-
-        return dateCatExpense;
+        Object[] expenseAndSumMaps= new  Object[2];
+        expenseAndSumMaps[0] = dateCatExpense ;
+        expenseAndSumMaps[1] = dateCatOptionSum;
+        return  expenseAndSumMaps;
     }
 
 

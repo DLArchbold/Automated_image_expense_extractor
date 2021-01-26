@@ -23,13 +23,16 @@ public class OneLevelExpenseAdapter extends BaseExpandableListAdapter {
     private final List<String> validCategories;
 //    private final Map<String, List<String>> mListData_SecondLevel_Map;
     private final Map<String, Cursor> catsExpenses;
+    private final Map<String, Cursor> catsSums;
+
     LayoutInflater mInflater;
 
-    public OneLevelExpenseAdapter (Context mContext, List<String> validCategories, Map<String, Cursor> catsExpenses){
+    public OneLevelExpenseAdapter (Context mContext, List<String> validCategories, Map<String, Cursor> catsExpenses, Map<String, Cursor> catsSums){
             this.mContext = mContext;
             this.validCategories = new ArrayList<>();
             this.validCategories.addAll(validCategories);
             this.catsExpenses = catsExpenses;
+            this.catsSums = catsSums;
             // Init second level data
 //            String[] mItemHeaders;
 //            mListData_SecondLevel_Map = new HashMap<>();
@@ -67,8 +70,9 @@ public class OneLevelExpenseAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public Object getGroup(int groupPosition) {
-        return this.validCategories.get(groupPosition);
+    public Object[] getGroup(int groupPosition) {
+
+        return new Object[]{this.catsSums.get(this.validCategories.get(groupPosition)), this.validCategories.get(groupPosition)};
     }
 
     @Override
@@ -98,7 +102,17 @@ public class OneLevelExpenseAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        String headerTitle = (String) getGroup(groupPosition);
+        Object[] groupValues = getGroup(groupPosition);
+
+        Cursor categorySumCursor = ((Cursor) groupValues[0]);
+        //moveToFirst() since if moveToNext(), geGroupView() might run >1 time for same group
+        categorySumCursor.moveToFirst();
+        String sumColName = categorySumCursor.getColumnName(0);
+        int sumColIndex = categorySumCursor.getColumnIndex(sumColName);
+        String  categorySum = categorySumCursor.getString(sumColIndex);
+
+        String headerTitle = (String) groupValues[1];
+
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) this.mContext
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -111,6 +125,15 @@ public class OneLevelExpenseAdapter extends BaseExpandableListAdapter {
         lblListHeader.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         Log.e("OneLevelExpenseAdapter", String.valueOf("in OneLevelExpenseAdapter, getGroupView()" + headerTitle));
         lblListHeader.setTextColor(Color.CYAN);
+
+        TextView lbListSum = (TextView)convertView.findViewById(R.id.lblListSum);
+        lbListSum.setText(categorySum);
+        lbListSum.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+        lbListSum.setTextColor(Color.WHITE);
+
+
+
+
         return convertView;
     }
 
@@ -136,41 +159,47 @@ public class OneLevelExpenseAdapter extends BaseExpandableListAdapter {
 
         Log.e("OneLevelExpenseAdapter", String.valueOf("in OneLevelExpenseAdapter getChildView()"));
         // Find individual views from the list_item layout that we want to modify
-        TextView expenseIdTextView = (TextView) convertView.findViewById(R.id.expense_id);
-        TextView optionTextView = (TextView) convertView.findViewById(R.id.option);
-        TextView dateTextView = (TextView) convertView.findViewById(R.id.date);
+       // TextView expenseIdTextView = (TextView) convertView.findViewById(R.id.expense_id);
+       // TextView optionTextView = (TextView) convertView.findViewById(R.id.option);
+        //TextView dateTextView = (TextView) convertView.findViewById(R.id.date);
         TextView amountTextView = (TextView) convertView.findViewById(R.id.amount);
         TextView descriptionTextView = (TextView) convertView.findViewById(R.id.description);
-        TextView categoryTextView = (TextView) convertView.findViewById(R.id.category);
+       // TextView categoryTextView = (TextView) convertView.findViewById(R.id.category);
 
 
         //Get column indices
-        int expenseIDColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry._ID);
+       // int expenseIDColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry._ID);
         int optionColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_OPTION);
-        int dayColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_DAY);
-        int monthColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_MONTH);
-        int yearColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_YEAR);
+        //int dayColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_DAY);
+       // int monthColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_MONTH);
+        //int yearColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_YEAR);
         int amountColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT);
         int descriptionColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_DESCRIPTION);
-        int categoryColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_CATEGORY);
+       // int categoryColumnIndex = cursor.getColumnIndex(ExpenseContract.ExpenseEntry.COLUMN_CATEGORY);
 
         // Extract properties from cursor
-        String expenseID = cursor.getString(expenseIDColumnIndex);
+        //String expenseID = cursor.getString(expenseIDColumnIndex);
         String option = cursor.getString(optionColumnIndex);
-        String day = cursor.getString(dayColumnIndex);
-        String month = cursor.getString(monthColumnIndex);
-        String year = cursor.getString(yearColumnIndex);
+       // String day = cursor.getString(dayColumnIndex);
+        //String month = cursor.getString(monthColumnIndex);
+        //String year = cursor.getString(yearColumnIndex);
         String amount = cursor.getString(amountColumnIndex);
         String description = cursor.getString(descriptionColumnIndex);
-        String category = cursor.getString(categoryColumnIndex);
+        //String category = cursor.getString(categoryColumnIndex);
 
         // Populate fields with extracted properties
-        expenseIdTextView.setText(expenseID);
-        optionTextView.setText(option);
-        dateTextView.setText(day + " - " + month + " - " + year);
+       // expenseIdTextView.setText(expenseID);
+        //optionTextView.setText(option);
+        //dateTextView.setText(day + " - " + month + " - " + year);
         amountTextView.setText(amount);
+        if(option.equals("Expense")){
+            amountTextView.setTextColor(Color.RED);
+        }else{
+            amountTextView.setTextColor(Color.rgb(45, 181, 66));
+        }
+
         descriptionTextView.setText(description);
-        categoryTextView.setText(category);
+       // categoryTextView.setText(category);
         Log.e("OneLevelExpenseAdapter", String.valueOf("in OneLevelExpenseAdapter getChildView()" ));
         return convertView;
 

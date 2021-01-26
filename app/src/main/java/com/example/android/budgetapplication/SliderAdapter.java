@@ -16,16 +16,23 @@ import androidx.viewpager.widget.PagerAdapter;
 
 import com.example.android.budgetapplication.R;
 
+import org.w3c.dom.Text;
+
+import java.util.HashMap;
+
 public class SliderAdapter extends PagerAdapter {
 
     Context context;
     LayoutInflater layoutInflater;
     OneLevelExpenseAdapter[] expensePageAdapters;
     OneLevelExpenseAdapter[] incomePageAdapters;
-    public SliderAdapter(Context context, OneLevelExpenseAdapter[] expensePageAdapters, OneLevelExpenseAdapter[] incomePageAdapters){
+    HashMap<Integer, String> idxDate;
+    public SliderAdapter(Context context, OneLevelExpenseAdapter[] expensePageAdapters,
+                         OneLevelExpenseAdapter[] incomePageAdapters, HashMap<Integer, String>idxDate ){
         this.context = context;
         this.expensePageAdapters = expensePageAdapters;
         this.incomePageAdapters = incomePageAdapters;
+        this.idxDate = idxDate;
     }
 
 
@@ -53,21 +60,34 @@ public class SliderAdapter extends PagerAdapter {
 //        TextView slideHeading = (TextView) view.findViewById(R.id.slide_heading);
 //        TextView slideDescription = (TextView) view.findViewById(R.id.slide_desc);
 
+        TextView date = (TextView) view.findViewById(R.id.date);
+        date.setText(idxDate.get(position));
+
         ExpandableListView expenseExpandableListView = (ExpandableListView) view.findViewById(R.id.list);
+        TextView lbListHeaderExpenses = (TextView) view.findViewById(R.id.lblListHeaderExpenses);
         OneLevelExpenseAdapter expenseAdapter = null;
         if(expensePageAdapters[position] == null){
             expenseAdapter = null;
+            lbListHeaderExpenses = null;
         }else{
             expenseAdapter = expensePageAdapters[position];
+            lbListHeaderExpenses.setText("Expenses");
         }
         expenseExpandableListView.setAdapter(expenseAdapter);
 
+
+
+
         ExpandableListView incomeExpandableListView = (ExpandableListView) view.findViewById(R.id.income_list);
+
+        TextView lbListHeaderIncome = (TextView) view.findViewById(R.id.lblListHeaderIncome);
         OneLevelExpenseAdapter incomeAdapter = null;
         if(incomePageAdapters[position] == null){
             incomeAdapter = null;
+            lbListHeaderIncome = null;
         }else{
             incomeAdapter = incomePageAdapters[position];
+            lbListHeaderIncome.setText("Income");
         }
         incomeExpandableListView.setAdapter(incomeAdapter);
 //        slideImageView.setImageResource(slide_images[position]);
