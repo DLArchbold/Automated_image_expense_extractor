@@ -151,9 +151,52 @@
                 android:paddingRight="16dp"
                 android:spinnerMode="dropdown"/>
         </LinearLayout>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/container_coordinates"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:id = "@+id/coordinate_label"
+            android:text="Location/Coordinates"
+            style="@style/CategoryStyle" />
+
+        <!-- Input field -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <!-- For date picker-->
+            <EditText
+                android:id="@+id/coordinates"
+                android:hint="Tap to get coordinates"
+                android:inputType="none"
+                android:editable="false"
+                style="@style/EditorFieldStyle" />
+
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Add Button -->
+    <!-- See location Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id = "@+id/button_see_location"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="See location"/>
+    </LinearLayout>
+    <!-- Add/update Button -->
     <LinearLayout
         android:id="@+id/container_add"
         android:layout_width="match_parent"
@@ -166,5 +209,21 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="Add"/>
+    </LinearLayout>
+
+    <!-- Delete Button -->
+    <LinearLayout
+        android:id="@+id/container_delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id = "@+id/button_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Delete"
+            android:visibility="gone"/>
     </LinearLayout>
 </LinearLayout>

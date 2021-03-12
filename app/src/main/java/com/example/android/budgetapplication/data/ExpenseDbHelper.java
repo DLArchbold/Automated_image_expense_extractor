@@ -22,7 +22,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
 /**
- * Database helper for Pets app. Manages database creation and version management.
+ * Database helper for BudgeApplication app. Manages database creation and version management.
  */
 public class ExpenseDbHelper extends SQLiteOpenHelper {
 
@@ -34,7 +34,7 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
     /**
      * Database version. If you change the database schema, you must increment the database version.
      */
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     /**
      * Constructs a new instance of {@link ExpenseDbHelper}.
@@ -60,7 +60,8 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
                 + ExpenseEntry.COLUMN_AMOUNT + " DOUBLE(5, 2),"
                 + ExpenseEntry.COLUMN_DESCRIPTION + " TEXT, "
                 + ExpenseEntry.COLUMN_CATEGORY + " TEXT, "
-                +ExpenseEntry.COLUMN_DATE + " TEXT);";
+                +ExpenseEntry.COLUMN_DATE + " TEXT, "
+                +ExpenseEntry.COLUMN_COORDINATES + " TEXT);";
 
         db.execSQL(SQL_CREATE_EXPENSE_TABLE);
 

@@ -110,6 +110,13 @@ public class ExpenseProvider extends ContentProvider {
 
                 // {option}
                 selectionArgs = new String[]{strUri.substring(strUri.lastIndexOf("/")+1)};
+
+                //For this case, reutrn cursor of balances for each day
+                if(selectionArgs[0]  == "balances"){
+                    cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, null, null,
+                            ExpenseContract.ExpenseEntry.COLUMN_DATE, null, sortOrder);
+                    return cursor;
+                }
                 // This will perform a query on the expenses table where the date and expense/income category equals the
                 // selectionArgs to return a Cursor containing rows of the table.
                 cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
@@ -201,6 +208,8 @@ public class ExpenseProvider extends ContentProvider {
         }
         return ContentUris.withAppendedId(uri, id);
     }
+
+
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         // Get writeable database
@@ -221,6 +230,8 @@ public class ExpenseProvider extends ContentProvider {
         }
 
     }
+
+
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String selection, @Nullable String[] selectionArgs) {
@@ -249,40 +260,76 @@ public class ExpenseProvider extends ContentProvider {
     private int updateExpense(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 
         //Check existing row values.
-//        // If the {@link PetEntry#COLUMN_PET_NAME} key is present,
-//        // check that the name value is not null.
-//        if (values.containsKey(ExpenseContract.ExpenseEntry)) {
-//            String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
-//            if (name == null) {
-//                throw new IllegalArgumentException("Pet requires a name");
-//            }
-//        }
-//
-//        // If the {@link PetEntry#COLUMN_PET_GENDER} key is present,
-//        // check that the gender value is valid.
-//        if (values.containsKey(PetEntry.COLUMN_PET_GENDER)) {
-//            Integer gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
-//            if (gender == null || !PetEntry.isValidGender(gender)) {
-//                throw new IllegalArgumentException("Pet requires valid gender");
-//            }
-//        }
-//
+        // If the {@link ExpenseContract.ExpenseEntry.COLUMN_OPTION} key is present,
+        // check that the name value is not null.
+        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_OPTION)) {
+            String option = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_OPTION);
+            if (option == null) {
+                throw new IllegalArgumentException("Error: Entry requires an option (Income/Expense)");
+            }
+        }
+
+        // If the {@link PetEntry#COLUMN_PET_GENDER} key is present,
+        // check that the gender value is valid.
+        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_DAY)) {
+            Integer day = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_DAY);
+            if (day == null ) {
+                throw new IllegalArgumentException("Error: Entry requires that you select a day");
+            }
+        }
+
+        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_MONTH)) {
+            Integer month = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_MONTH);
+            if (month == null ) {
+                throw new IllegalArgumentException("Error: Entry requires that you select a month");
+            }
+        }
+
+        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_YEAR)) {
+            Integer year = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_YEAR);
+            if (year == null) {
+                throw new IllegalArgumentException("Error: Entry requires that you select a year)");
+            }
+        }
+
+
+
+        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT)) {
+            Double amount = values.getAsDouble(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT);
+            if (amount == 0.00 ) {
+                throw new IllegalArgumentException("Error: Amount cannot be 0");
+            }else if (amount == null){
+                throw new IllegalArgumentException("Error: Please enter an amount.");
+            }
+        }
+        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_CATEGORY)) {
+            String category = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_CATEGORY);
+            if (category == null) {
+                throw new IllegalArgumentException("Error: Entry requires that you select a category)");
+            }
+        }
+
+        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_DATE)) {
+            String date = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_DATE);
+            if (date == null) {
+                throw new IllegalArgumentException("Error: Entry requires that you select a date)");
+            }
+        }
+
 //        // If the {@link PetEntry#COLUMN_PET_WEIGHT} key is present,
 //        // check that the weight value is valid.
 //        if (values.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
 //            // Check that the weight is greater than or equal to 0 kg
 //            Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
 //            if (weight != null && weight < 0) {
-//                throw new IllegalArgumentException("Pet requires valid weight");
+//                throw new IllegalArgumentException("Error: Entry requires that you enter a year)");
 //            }
 //        }
-//
-//        // No need to check the breed, any value is valid (including null).
-//
-//        // If there are no values to update, then don't try to update the database
-//        if (values.size() == 0) {
-//            return 0;
-//        }
+
+        // If there are no values to update, then don't try to update the database
+        if (values.size() == 0) {
+            return 0;
+        }
 
         // Otherwise, get writeable database to update the data
         SQLiteDatabase database = mDbHelper.getWritableDatabase();

@@ -250,9 +250,12 @@ public class MainActivity extends AppCompatActivity
         OneLevelExpenseAdapter[] expensePageAdapters = expenseIncomePageAdapters[0];
         OneLevelExpenseAdapter[] incomePageAdapters = expenseIncomePageAdapters[1];
 
+        //Fill array for date balances for each page
+        double[] balanceForEachDate = dateBalances(datePosition);
+
         //Assign SliderAdapter to ViewPager after readying data in SliderAdapter
         mSlideViewPager = (ViewPager) findViewById(R.id.slideViewPager);
-        sliderAdapter = new SliderAdapter(this, expensePageAdapters, incomePageAdapters, idxDate);
+        sliderAdapter = new SliderAdapter(this, expensePageAdapters, incomePageAdapters, idxDate, balanceForEachDate);
         mSlideViewPager.setAdapter(sliderAdapter);
         //view pager start on last page for
         mSlideViewPager.setCurrentItem(Math.max(expensePageAdapters.length, incomePageAdapters.length));
@@ -416,7 +419,7 @@ public class MainActivity extends AppCompatActivity
             List<String> validCategories = new ArrayList<String>();
             String valCatArray [] = Arrays.copyOf(validCatArr, validCatArr.length, String[].class);
             List<String> validCatList = Arrays.asList(valCatArray);
-            pageAdapters[ctr] = new OneLevelExpenseAdapter(this, validCatList, catsExpenses, catsSum);
+            pageAdapters[ctr] = new OneLevelExpenseAdapter(this, validCatList, catsExpenses, catsSum, expenseOrIncome);
 
             //Expense pageAdapters fill column 0, while income page adapters fill column 1. Each row represents a day.
             //which may have either or both expenses/income
@@ -430,6 +433,40 @@ public class MainActivity extends AppCompatActivity
             ctr++;
         }
         return expenseIncomePageAdapters;
+    }
+
+    private double [] dateBalances (HashMap<String, Integer> datePosition){
+        String[] projection =  { ExpenseEntry.COLUMN_DATE , ExpenseEntry.COLUMN_AMOUNT  };
+        Cursor balancesCursor;
+        balancesCursor = getContentResolver().query(
+                ExpenseEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null
+
+        );
+
+        double[] balanceForEachDate =new double[datePosition.size()];
+
+
+        balancesCursor.moveToFirst();
+        int dateColIdx = balancesCursor.getColumnIndex(ExpenseEntry.COLUMN_DATE);
+        int amtColIdx = balancesCursor.getColumnIndex(ExpenseEntry.COLUMN_AMOUNT);
+        for( int i = 0; i<balancesCursor.getCount(); i++ ){
+
+            String date = balancesCursor.getString(dateColIdx);
+            double amt = balancesCursor.getDouble(amtColIdx);
+            System.out.println("date print: " + date);
+            if(date.equals("20-2-2021")){
+                System.out.println("amt when 20-2-2021 " + amt);
+            }
+            balanceForEachDate[datePosition.get(date)] += amt;
+            balancesCursor.moveToNext();
+        }
+
+        return balanceForEachDate;
+
     }
 
 

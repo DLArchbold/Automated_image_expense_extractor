@@ -5,7 +5,8 @@
     <uses-feature android:name = "android.hardware.camera2"
         android:required="true"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name= "android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -25,11 +26,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".WayActivity">
+
         </activity>
         <activity android:name=".ManualEntryActivity"
             android:label="@string/manual_add_expense"
-            android:theme="@style/EditorTheme"
-            android:parentActivityName=".WayActivity" >
+            android:parentActivityName=".WayActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
