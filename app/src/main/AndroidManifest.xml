@@ -63,6 +63,11 @@
         android:authorities = "com.example.android.budgetapplication"
                 android:exported="false"
         ></provider>
+
+        <service
+            android:enabled="true"
+            android:name=".LocationService" >
+     </service>
     </application>
 
 </manifest>

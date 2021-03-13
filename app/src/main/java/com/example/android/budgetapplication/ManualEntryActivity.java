@@ -5,15 +5,18 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -106,17 +109,25 @@ public class ManualEntryActivity extends AppCompatActivity {
     //ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     ScheduledExecutorService executorService;
     private Button seeLocationButton;
-
+    static final String ACTION_STARTLISTENING = "startListening";
+    LocationService locServ;
+    String test;
+    BroadcastReceiver br;
+    String latitude;
+    String longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manual_entry);
 
-
+        //If updating, get updated record
         if (getIntent().hasExtra("oneRecordValues") == true) {
             oneRecordValues = getIntent().getExtras().getStringArray("oneRecordValues");
         }
+
+
+
 
 
         expenseIncomeOptionSpinner = (Spinner) findViewById(R.id.spinner_expense_income_option);
@@ -131,6 +142,35 @@ public class ManualEntryActivity extends AppCompatActivity {
         coordinate_label = (TextView) findViewById(R.id.coordinate_label);
         coordinateField = (EditText) findViewById(R.id.coordinates);
         seeLocationButton = (Button) findViewById(R.id.button_see_location);
+
+        locServ = new LocationService();
+
+        br = new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                coordinateField.setEnabled(true);
+                coordinateField.setClickable(true);
+
+                latitude =  intent.getStringExtra("latitude");
+                longitude = intent.getStringExtra("longitude");
+                Uri uri = Uri.parse("google.streetview:cbll:" + latitude + ", " + longitude);
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                startActivity(mapIntent);
+
+                coordinateField.setText(latitude + "," + longitude);
+            }
+        };
+        IntentFilter filter = new IntentFilter("com.example.android.budgetapplication/locationResult");
+        this.registerReceiver(br, filter);
+        if (oneRecordValues != null && !oneRecordValues[6].isEmpty()) {
+            coordinateField.setText(oneRecordValues[6]);
+        }
+
+        checkLocationPermissions();
+
+
 
         //Set up regardless if new or updating record
         setupDatePicker();
@@ -150,56 +190,61 @@ public class ManualEntryActivity extends AppCompatActivity {
 
     }
 
+
+
+    @Override
+    protected void onDestroy() {
+
+        //you should unregister it in onDestroy() to prevent leaking the receiver out of the activity context.
+        super.onDestroy();
+        unregisterReceiver(br);
+    }
+
     private void setupLocationServices() {
 
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                coordinateField.setEnabled(true);
-                coordinateField.setClickable(true);
-                locationManager.removeUpdates(locationListener);
-                locationManager = null;
-                Uri uri = Uri.parse("google.streetview:cbll:" + String.valueOf(location.getLatitude()) + ", " + String.valueOf(location.getLongitude()));
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
-                mapIntent.setPackage("com.google.android.apps.maps");
-                //String tx = coordinateField.getText().toString();
-//                coordinateField.setText("");
-//               tx = coordinateField.getText().toString();
+//        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+//        locationListener = new LocationListener() {
+//            @Override
+//            public void onLocationChanged(Location location) {
+//                coordinateField.setEnabled(true);
+//                coordinateField.setClickable(true);
+//                locationManager.removeUpdates(locationListener);
+//                locationManager = null;
+//                Uri uri = Uri.parse("google.streetview:cbll:" + String.valueOf(location.getLatitude()) + ", " + String.valueOf(location.getLongitude()));
+//                Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+//                mapIntent.setPackage("com.google.android.apps.maps");
+//                //String tx = coordinateField.getText().toString();
+////                coordinateField.setText("");
+////               tx = coordinateField.getText().toString();
+////                coordinateField.setText(location.getLatitude() + "," + location.getLongitude());
+////                //coordinateField.setInputType(InputType.TYPE_NULL);
+////                tx = coordinateField.getText().toString();
+//                startActivity(mapIntent);
+//                locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+//                //coordinateField.append("\n " + location.getLatitude() + " " + location.getLongitude());
+//
 //                coordinateField.setText(location.getLatitude() + "," + location.getLongitude());
-//                //coordinateField.setInputType(InputType.TYPE_NULL);
-//                tx = coordinateField.getText().toString();
-                startActivity(mapIntent);
-                locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-                //coordinateField.append("\n " + location.getLatitude() + " " + location.getLongitude());
+//
+//            }
+//
+//            @Override
+//            public void onStatusChanged(String s, int i, Bundle bundle) {
+//
+//            }
+//
+//            @Override
+//            public void onProviderEnabled(String s) {
+//            }
+//
+//            @Override
+//            public void onProviderDisabled(String s) {
+//                //Check if GPS is disabled, open settings
+//                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                startActivity(intent);
+//            }
+//
+//        };
 
-                coordinateField.setText(location.getLatitude() + "," + location.getLongitude());
-
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-                //Check if GPS is disabled, open settings
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-
-        };
-
-        if (oneRecordValues != null && !oneRecordValues[6].isEmpty()) {
-            coordinateField.setText(oneRecordValues[6]);
-        }
-
-        checkLocationPermissions();
 
 
     }
@@ -354,7 +399,10 @@ public class ManualEntryActivity extends AppCompatActivity {
         coordinateField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if(ActivityCompat.checkSelfPermission(ManualEntryActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ManualEntryActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                    //When user switch off location services in current activity
+                    checkLocationPermissions();
+                }
 
                 //Location set
                 if (coordinateField.getText().toString().contains(",")) {
@@ -377,7 +425,11 @@ public class ManualEntryActivity extends AppCompatActivity {
                                 coordinateField.setEnabled(false);
                                 coordinateField.setClickable(false);
                                 //Set minDist to 0 to get 2nd update to execute onLocationChanged
-                                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+                                Intent sendIntent = new Intent(getApplicationContext(), LocationService.class);
+                                sendIntent.setAction(ACTION_STARTLISTENING);
+                                sendIntent.setType("text/plain");
+                                startService(sendIntent);
+                                //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
                                 executorService = Executors.newSingleThreadScheduledExecutor();
                                 setupBackgroundThread(executorService);
                             }
@@ -404,7 +456,11 @@ public class ManualEntryActivity extends AppCompatActivity {
                         coordinateField.setEnabled(false);
                         coordinateField.setClickable(false);
                         //Set minDist to 0 to get 2nd update to execute onLocationChanged
-                        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+                        Intent sendIntent = new Intent(getApplicationContext(), LocationService.class);
+                        sendIntent.setAction(ACTION_STARTLISTENING);
+                        sendIntent.setType("text/plain");
+                        startService(sendIntent);
+                        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
                         executorService = Executors.newSingleThreadScheduledExecutor();
                         setupBackgroundThread(executorService);
                     }
@@ -420,7 +476,11 @@ public class ManualEntryActivity extends AppCompatActivity {
                     coordinateField.setEnabled(false);
                     coordinateField.setClickable(false);
                     //Set minDist to 0 to get 2nd update to execute onLocationChanged
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+                    Intent sendIntent = new Intent(getApplicationContext(), LocationService.class);
+                    sendIntent.setAction(ACTION_STARTLISTENING);
+                    sendIntent.setType("text/plain");
+                    startService(sendIntent);
+                    //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
                     executorService = Executors.newSingleThreadScheduledExecutor();
                     setupBackgroundThread(executorService);
                 }
@@ -431,7 +491,8 @@ public class ManualEntryActivity extends AppCompatActivity {
 
     }
 
-    private void setupBackgroundThread(final ScheduledExecutorService executorService) {
+    private void
+    setupBackgroundThread(final ScheduledExecutorService executorService) {
         if (executorService != null) {
             waitTime = 0;
 
