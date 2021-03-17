@@ -1,4 +1,4 @@
-package com.example.android.budgetapplication;
+package com.example.android.budgetapplication.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import com.example.android.budgetapplication.R;
 import com.example.android.budgetapplication.data.ExpenseContract;
 
 import java.util.ArrayList;
@@ -207,9 +208,9 @@ public class OneLevelExpenseAdapter extends BaseExpandableListAdapter {
         //dateTextView.setText(day + " - " + month + " - " + year);
         amountTextView.setText(amount);
         if(option.equals("Expense")){
-            amountTextView.setTextColor(Color.RED);
+            amountTextView.setTextColor(mContext.getResources().getColor(R.color.expenses));
         }else{
-            amountTextView.setTextColor(Color.rgb(45, 181, 66));
+            amountTextView.setTextColor(mContext.getResources().getColor(R.color.income));
         }
 
         descriptionTextView.setText(description);

@@ -50,22 +50,24 @@ public class LocationService extends Service implements LocationListener {
         intent.putExtra("latitude", String.valueOf(location.getLatitude()));
         intent.putExtra("longitude", String.valueOf(location.getLongitude()));
         sendBroadcast(intent);
+        //Stop getting updates when done
         locationManager.removeUpdates(this);
         locationManager = null;
     }
 
     public void onProviderDisabled(final String provider) {
         //Check if GPS is disabled, open settings
-        //Check if GPS is disabled, open settings
 
         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         startActivity(intent);
         if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            onProviderDisabled("gps");
+           onProviderDisabled("gps");
+
         }else{
             return;
         }
     }
+
 
     public void onProviderEnabled(final String provider) {
     }

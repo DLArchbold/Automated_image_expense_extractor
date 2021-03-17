@@ -3,4 +3,6 @@
     <color name="colorPrimary">#96DBAE</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="income">#52A449</color>
+    <color name="expenses">#D02200</color>
 </resources>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    >
+
+
+
+    <!-- Start date -->
+    <LinearLayout
+        android:id="@+id/container_start_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="Start date"
+            style="@style/CategoryStyle" />
+
+        <!-- Input field -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <!-- For date picker-->
+            <EditText
+                android:id="@+id/start_date"
+                android:hint="Day/Month/Year"
+                android:inputType="none"
+                android:editable="false"
+                style="@style/EditorFieldStyle" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- End date -->
+    <LinearLayout
+        android:id="@+id/container_end_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="End date"
+            style="@style/CategoryStyle" />
+
+        <!-- Input field -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <!-- For date picker-->
+            <EditText
+                android:id="@+id/end_date"
+                android:hint="Day/Month/Year"
+                android:inputType="none"
+                android:editable="false"
+                style="@style/EditorFieldStyle" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Spend limit -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="Spend limit"
+            style="@style/CategoryStyle" />
+
+        <!-- Input fields -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:paddingLeft="4dp"
+            android:orientation="vertical">
+
+            <!-- Amount field -->
+            <EditText
+                android:id="@+id/spend_limit"
+                android:hint="Spend limit"
+                android:inputType="numberDecimal"
+                style="@style/EditorFieldStyle" />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <!-- Expense/income category -->
+    <LinearLayout
+        android:id="@+id/container_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="Category"
+            style="@style/CategoryStyle" />
+
+        <!-- Input field -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <!-- Expense/Income drop-down spinner -->
+            <Spinner
+                android:id="@+id/spinner_category"
+                android:layout_height="48dp"
+                android:layout_width="wrap_content"
+                android:paddingRight="16dp"
+                android:spinnerMode="dropdown"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+    <!-- Add/update Button -->
+    <LinearLayout
+        android:id="@+id/container_add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id = "@+id/button_add_budget"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Add"/>
+    </LinearLayout>
+
+    <!-- Delete Button -->
+    <LinearLayout
+        android:id="@+id/container_delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id = "@+id/button_delete_budget"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Delete"
+            android:visibility="gone"/>
+    </LinearLayout>
+</LinearLayout>

@@ -56,25 +56,25 @@
             android:orientation="vertical">
 
             <!-- Date fields -->
-<!--            &lt;!&ndash; Day field &ndash;&gt;-->
-<!--            <EditText-->
-<!--                android:id="@+id/edit_day"-->
-<!--                android:hint="Day"-->
-<!--                android:inputType="number"-->
-<!--                style="@style/EditorFieldStyle" />-->
+            <!--            &lt;!&ndash; Day field &ndash;&gt;-->
+            <!--            <EditText-->
+            <!--                android:id="@+id/edit_day"-->
+            <!--                android:hint="Day"-->
+            <!--                android:inputType="number"-->
+            <!--                style="@style/EditorFieldStyle" />-->
 
-<!--            &lt;!&ndash; Month field &ndash;&gt;-->
-<!--            <EditText-->
-<!--                android:id="@+id/edit_month"-->
-<!--                android:hint="Month"-->
-<!--                android:inputType="number"-->
-<!--                style="@style/EditorFieldStyle" />-->
-<!--            &lt;!&ndash; Year field &ndash;&gt;-->
-<!--            <EditText-->
-<!--                android:id="@+id/edit_year"-->
-<!--                android:hint="Year"-->
-<!--                android:inputType="number"-->
-<!--                style="@style/EditorFieldStyle" />-->
+            <!--            &lt;!&ndash; Month field &ndash;&gt;-->
+            <!--            <EditText-->
+            <!--                android:id="@+id/edit_month"-->
+            <!--                android:hint="Month"-->
+            <!--                android:inputType="number"-->
+            <!--                style="@style/EditorFieldStyle" />-->
+            <!--            &lt;!&ndash; Year field &ndash;&gt;-->
+            <!--            <EditText-->
+            <!--                android:id="@+id/edit_year"-->
+            <!--                android:hint="Year"-->
+            <!--                android:inputType="number"-->
+            <!--                style="@style/EditorFieldStyle" />-->
 
             <!-- For date picker-->
             <EditText
@@ -105,22 +105,22 @@
             android:layout_width="0dp"
             android:layout_weight="2"
             android:paddingLeft="4dp"
-        android:orientation="vertical">
+            android:orientation="vertical">
 
-        <!-- Amount field -->
-        <EditText
-            android:id="@+id/edit_amount"
-            android:hint="@string/edit_amount"
-            android:inputType="numberDecimal"
-            style="@style/EditorFieldStyle" />
+            <!-- Amount field -->
+            <EditText
+                android:id="@+id/edit_amount"
+                android:hint="@string/edit_amount"
+                android:inputType="numberDecimal"
+                style="@style/EditorFieldStyle" />
 
-        <!-- description field -->
-        <EditText
-            android:id="@+id/edit_description"
-            android:hint="@string/edit_description"
-            android:inputType="textAutoComplete"
-            style="@style/EditorFieldStyle" />
-    </LinearLayout>
+            <!-- description field -->
+            <EditText
+                android:id="@+id/edit_description"
+                android:hint="@string/edit_description"
+                android:inputType="textAutoComplete"
+                style="@style/EditorFieldStyle" />
+        </LinearLayout>
     </LinearLayout>
 
 

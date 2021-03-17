@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
+import com.example.android.budgetapplication.data.BudgetContract.BudgetEntry;
 
 /**
  * Database helper for BudgeApplication app. Manages database creation and version management.
@@ -34,7 +35,7 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
     /**
      * Database version. If you change the database schema, you must increment the database version.
      */
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 6;
 
     /**
      * Constructs a new instance of {@link ExpenseDbHelper}.
@@ -63,6 +64,20 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
                 +ExpenseEntry.COLUMN_DATE + " TEXT, "
                 +ExpenseEntry.COLUMN_COORDINATES + " TEXT);";
 
+        String SQL_CREATE_BUDGET_TABLE = "CREATE TABLE " + BudgetEntry.TABLE_NAME + " ("
+                + BudgetEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + BudgetEntry.COLUMN_START_DAY + " INTEGER NOT NULL, "
+                + BudgetEntry.COLUMN_START_MONTH + " INTEGER NOT NULL, "
+                + BudgetEntry.COLUMN_START_YEAR + " INTEGER NOT NULL, "
+                + BudgetEntry.COLUMN_START_DATE + " TEXT NOT NULL, "
+                + BudgetEntry.COLUMN_END_DAY + " INTEGER NOT NULL, "
+                + BudgetEntry.COLUMN_END_MONTH + " INTEGER NOT NULL, "
+                + BudgetEntry.COLUMN_END_YEAR + " INTEGER NOT NULL, "
+                + BudgetEntry.COLUMN_END_DATE + " TEXT NOT NULL, "
+                + BudgetEntry.COLUMN_SPEND_LIMIT + " DOUBLE(5, 2) NOT NULL, "
+                + BudgetEntry.COLUMN_CATEGORY + " INTEGER NOT NULL);";
+
+        db.execSQL(SQL_CREATE_BUDGET_TABLE);
         db.execSQL(SQL_CREATE_EXPENSE_TABLE);
 
     }
@@ -71,8 +86,9 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
+        //db.execSQL("DROP TABLE IF EXISTS "+ExpenseEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS "+BudgetEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS "+ExpenseEntry.TABLE_NAME);
-
         onCreate(db);
 
     }

@@ -149,21 +149,25 @@ public class ManualEntryActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                coordinateField.setEnabled(true);
-                coordinateField.setClickable(true);
+                    coordinateField.setEnabled(true);
+                    coordinateField.setClickable(true);
 
-                latitude =  intent.getStringExtra("latitude");
-                longitude = intent.getStringExtra("longitude");
-                Uri uri = Uri.parse("google.streetview:cbll:" + latitude + ", " + longitude);
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
-                mapIntent.setPackage("com.google.android.apps.maps");
-                startActivity(mapIntent);
+                    latitude =  intent.getStringExtra("latitude");
+                    longitude = intent.getStringExtra("longitude");
+                    Uri uri = Uri.parse("google.streetview:cbll:" + latitude + ", " + longitude);
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+                    mapIntent.setPackage("com.google.android.apps.maps");
+                    startActivity(mapIntent);
 
-                coordinateField.setText(latitude + "," + longitude);
+                    coordinateField.setText(latitude + "," + longitude);
+
+
             }
         };
         IntentFilter filter = new IntentFilter("com.example.android.budgetapplication/locationResult");
         this.registerReceiver(br, filter);
+
+
         if (oneRecordValues != null && !oneRecordValues[6].isEmpty()) {
             coordinateField.setText(oneRecordValues[6]);
         }
@@ -350,6 +354,10 @@ public class ManualEntryActivity extends AppCompatActivity {
                 if(coordinateField.getText().toString().contains(",")){
                     //open map
 
+                    Uri uri = Uri.parse("google.streetview:cbll:" + latitude + ", " + longitude);
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+                    mapIntent.setPackage("com.google.android.apps.maps");
+                    startActivity(mapIntent);
                 }else{
                     //dialog to get location
 

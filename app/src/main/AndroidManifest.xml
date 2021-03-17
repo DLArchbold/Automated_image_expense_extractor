@@ -48,6 +48,28 @@
                 android:value=".WayActivity" />
         </activity>
 
+        <activity android:name=".BudgetListActivity"
+            android:label="List of budgets"
+            android:parentActivityName=".MainActivity"
+            >
+            <!-- configure this activity to use landscape orientation -->
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+
+        <activity android:name=".ManualBudgetActivity"
+            android:label="Add a budget"
+            android:parentActivityName=".BudgetListActivity"
+            >
+            <!-- configure this activity to use landscape orientation -->
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".BudgetListActivity" />
+        </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.android.fileprovider"
@@ -63,6 +85,12 @@
         android:authorities = "com.example.android.budgetapplication"
                 android:exported="false"
         ></provider>
+
+        <provider
+            android:name=".data.BudgetProvider"
+            android:authorities = "com.example.android.budgetapplication.ManualBudgetActivity"
+            android:exported="false"
+            ></provider>
 
         <service
             android:enabled="true"

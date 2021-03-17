@@ -1,4 +1,4 @@
-package com.example.android.budgetapplication;
+package com.example.android.budgetapplication.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 
 
+import com.example.android.budgetapplication.ManualEntryActivity;
+import com.example.android.budgetapplication.R;
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
 import java.util.HashMap;

@@ -25,9 +25,9 @@
     <item android:title="Range">
         <menu>
             <item
-                android:id="@+id/nav_share"
+                android:id="@+id/supposed_spending_rate"
 
-                android:title="@string/menu_share" />
+                android:title="Supposed spending rate" />
             <item
                 android:id="@+id/nav_send"
 

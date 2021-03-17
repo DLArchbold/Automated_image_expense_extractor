@@ -1,20 +1,16 @@
+
 package com.example.android.budgetapplication;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.example.android.budgetapplication.data.ExpenseContract;
-import com.example.android.budgetapplication.data.ExpenseDbHelper;
-import com.example.android.budgetapplication.data.ExpenseProvider;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import com.example.android.budgetapplication.adapters.ExpandableListAdapter;
+import com.example.android.budgetapplication.adapters.OneLevelExpenseAdapter;
+import com.example.android.budgetapplication.adapters.SliderAdapter;
 
 import android.util.Log;
-import android.view.View;
 
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -27,28 +23,20 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.view.Menu;
-import android.widget.ExpandableListView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Set;
 
 
@@ -134,7 +122,7 @@ public class MainActivity extends AppCompatActivity
         Perform query on content provider using content resolver using URI.
         Use the {@link
          */
-
+/*
         //To delete row entries
 //        int  id = 1;
 //        for(int i = 1; i<7; i++){
@@ -235,7 +223,7 @@ public class MainActivity extends AppCompatActivity
 //            pageAdapters[ctr] = new OneLevelExpenseAdapter(this, validCatList, catsExpenses);
 //            ctr++;
 //        }
-
+*/
 
         //Unique dates and their would be idx on 2d array that contains income/expense Adapters
         HashMap<String, Integer> datePosition =  mapDatesToIdx();
@@ -645,7 +633,15 @@ public class MainActivity extends AppCompatActivity
 //        } else if (id == R.id.nav_tools) {
 //
 //        }
-        else if (id == R.id.nav_share) {
+        else if (id == R.id.supposed_spending_rate) {
+            //Open activity with expandable list view of set budgets, allow addition and selection of budget with form
+            //In form set start/end date, category, spend and save amount, then sum from available dates
+            //Then if still have days then figure out difference needed to overcome deficit if any.
+            //
+
+            Intent budgetListActivityIntent = new Intent(this, BudgetListActivity.class);
+            startActivity(budgetListActivityIntent);
+
 
         } else if (id == R.id.nav_send) {
 
