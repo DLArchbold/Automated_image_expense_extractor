@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -21,6 +22,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.android.budgetapplication.data.ExpenseContract;
 import com.example.android.budgetapplication.data.BudgetContract;
+
+import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +50,7 @@ public class ManualBudgetActivity extends AppCompatActivity {
     int endDy;
     String fullEndDate;
     Uri newUri;
-
+    private static DecimalFormat df = new DecimalFormat("0.00");
     String expenseIncomeCategory;
 
     @Override
@@ -56,10 +59,14 @@ public class ManualBudgetActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manual_budget);
 
 
-//        //If updating, get updated record
-//        if (getIntent().hasExtra("oneBudgetValues") == true) {
-//            oneBudgetValues = getIntent().getExtras().getStringArray("oneBudgetValues");
-//        }
+        //If updating, get updated record
+        if (getIntent().hasExtra("oneBudgetValues") == true) {
+            oneBudgetValues = getIntent().getExtras().getStringArray("oneBudgetValues");
+            TextView limit = (TextView) findViewById(R.id.spend_limit);
+            limit.setText(df.format(Double.parseDouble(oneBudgetValues[3])));
+            setupDeleteButton();
+
+        }
 
 
         startDate = findViewById(R.id.start_date);
@@ -71,6 +78,7 @@ public class ManualBudgetActivity extends AppCompatActivity {
         setupDatePickers();
         setupExpenseIncomeCategorySpinner();
          setupAddButton();
+
 
 
     }
@@ -123,8 +131,8 @@ public class ManualBudgetActivity extends AppCompatActivity {
 
             String endDateToSet = oneBudgetValues[2];
             endDate.setText(endDateToSet.replace("-", "/"));
-            endYr = Integer.parseInt(oneBudgetValues[2].substring(oneBudgetValues[2].lastIndexOf("-") + 2));
-            endMh = Integer.parseInt(oneBudgetValues[2].substring(oneBudgetValues[2].indexOf("-") + 2, oneBudgetValues[2].lastIndexOf("-")));
+            endYr = Integer.parseInt(oneBudgetValues[2].substring(oneBudgetValues[2].lastIndexOf("-") + 1));
+            endMh = Integer.parseInt(oneBudgetValues[2].substring(oneBudgetValues[2].indexOf("-") + 1, oneBudgetValues[2].lastIndexOf("-")));
             endDy = Integer.parseInt(oneBudgetValues[2].substring(0, oneBudgetValues[2].indexOf("-")));
             endDate.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -275,6 +283,27 @@ public class ManualBudgetActivity extends AppCompatActivity {
 
         }
     }
+    private void setupDeleteButton() {
+        Button deleteButton = findViewById(R.id.button_delete_budget);
+        deleteButton.setVisibility(View.VISIBLE);
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteRecord();
+                finish();
+            }
+        });
+
+    }
+
+    private void deleteRecord(){
+
+        String path = "/";
+        path = path.concat(oneBudgetValues[0]);
+        getContentResolver().delete(Uri.withAppendedPath(BudgetContract.BudgetEntry.CONTENT_URI, path), null, null);
+
+    }
 
     protected void setupAddButton(){
 
@@ -285,11 +314,12 @@ public class ManualBudgetActivity extends AppCompatActivity {
                 public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
-                    //updateBudget();
+                    updateBudget();
 
 
                 }
             });
+
         } else {
 
             addButton.setOnClickListener(new View.OnClickListener() {
@@ -303,6 +333,70 @@ public class ManualBudgetActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void updateBudget(){
+        //Read from input fields
+        int startDay = startDy;
+        int startMonth = startMh;
+        int startYear = startYr;
+
+        int endDay = endDy;
+        int endMonth = endMh;
+        int endYear = endYr;
+
+
+        expenseIncomeCategory = expenseIncomeCategory;
+        fullStartDate = startDy + "-" + startMh + "-" + startYr;
+        fullEndDate = endDy + "-" + endMh + "-" + endYr;
+        String limit = spendLimit.getText().toString();
+
+
+        //Create db helper
+        //ExpenseDbHelper mDbHelper = new ExpenseDbHelper(this);
+
+        // SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Create a ContentValues object where column names are the keys,
+        // and expense attributes from the editor are the values.
+        ContentValues values = new ContentValues();
+        values.put(BudgetContract.BudgetEntry.COLUMN_START_DAY, startDay);
+        values.put(BudgetContract.BudgetEntry.COLUMN_START_MONTH, startMonth);
+        values.put(BudgetContract.BudgetEntry.COLUMN_START_YEAR, startYear);
+        values.put(BudgetContract.BudgetEntry.COLUMN_START_DATE, fullStartDate);
+        values.put(BudgetContract.BudgetEntry.COLUMN_END_DAY, endDay);
+        values.put(BudgetContract.BudgetEntry.COLUMN_END_MONTH, endMonth);
+        values.put(BudgetContract.BudgetEntry.COLUMN_END_YEAR, endYear);
+        values.put(BudgetContract.BudgetEntry.COLUMN_END_DATE, fullEndDate);
+        values.put(BudgetContract.BudgetEntry.COLUMN_SPEND_LIMIT, Double.valueOf(spendLimit.getText().toString()));
+        values.put(BudgetContract.BudgetEntry.COLUMN_CATEGORY, expenseIncomeCategory);
+
+        // Insert a new row for expense in the database, returning the ID of that new row.
+        //long newRowId = db.insert(ExpenseEntry.TABLE_NAME, null, values);
+
+        // Insert a new row for an expense into the provider using the ContentResolver.
+        // Use the {@link ExpenseEntry#CONTENT_URI} to indicate that we want to insert
+        // into the budget database table.
+        // Receive the new content URI that will allow us to access this record's data in the future.
+        String path = "/" + oneBudgetValues[0];
+        int rowsUpdated = getContentResolver().update(Uri.withAppendedPath(BudgetContract.BudgetEntry.CONTENT_URI, path), values, null, null);
+
+        // Show a toast message depending on whether or not the insertion was successful
+        if (rowsUpdated == 0) {
+
+            // If rowsUpdated is 0, then there was an error with updating.
+            //Toasts created in ExpenseProvider, specific to whether Date/Amount/Description empty
+            //Toast.makeText(this, "Error with updating expense/income", Toast.LENGTH_LONG).show();
+            String toDisplay = "Error in updating: " + fullStartDate + ": " + fullEndDate;
+            Toast.makeText(this, toDisplay, Toast.LENGTH_LONG).show();
+            finish();
+        } else {
+            // Otherwise, the insertion was successful and we can display a toast.
+            String toDisplay = fullStartDate + ": " + fullEndDate + " updated successfully.";
+            Toast.makeText(this, toDisplay, Toast.LENGTH_LONG).show();
+            finish();//Return to MainActivity
+        }
+
     }
 
     private void insertBudget(){

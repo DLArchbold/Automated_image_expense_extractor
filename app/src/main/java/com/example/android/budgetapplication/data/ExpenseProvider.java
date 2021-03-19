@@ -25,9 +25,14 @@ public class ExpenseProvider extends ContentProvider {
     private static final int EXPENSE_DATE_CATEGORY = 3;
     private static final int EXPENSES_OR_INCOME_ONLY = 4;
     private static final int DATE_CATEGORY_OPTION = 5;
+    private static final int BUDGET_LIMIT = 6;
+    private static final int BUDGET_DAYS_WITH_SPENDING = 7;
     //private static final int INCOME_ONLY = 5;
-    /** Tag for the log messages */
+    /**
+     * Tag for the log messages
+     */
     public static final String LOG_TAG = ExpenseProvider.class.getSimpleName();
+
     @Override
     public boolean onCreate() {
         mDbHelper = new ExpenseDbHelper(getContext());
@@ -35,15 +40,17 @@ public class ExpenseProvider extends ContentProvider {
     }
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-    static{
+
+    static {
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES, EXPENSE);
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/#", EXPENSE_ID);
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" + "/*", EXPENSE_DATE_CATEGORY);
-        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" , EXPENSES_OR_INCOME_ONLY);
-        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" + "/*" + "/*" , DATE_CATEGORY_OPTION);
+        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*", EXPENSES_OR_INCOME_ONLY);
+        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" + "/*" + "/*", DATE_CATEGORY_OPTION);
+        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/#" + "/#" + "/#" + "/#" + "/#" + "/#" + "/*", BUDGET_LIMIT);
+        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/#" + "/#" + "/#" + "/#" + "/#" + "/#" + "/*" + "/*", BUDGET_DAYS_WITH_SPENDING);
         //sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" , INCOME_ONLY);
     }
-
 
 
     @Nullable
@@ -74,7 +81,7 @@ public class ExpenseProvider extends ContentProvider {
                 // arguments that will fill in the "?". Since we have 1 question mark in the
                 // selection, we have 1 String in the selection arguments' String array.
                 selection = ExpenseContract.ExpenseEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
                 // This will perform a query on the expenses table where the _id equals x to return a
                 // Cursor containing that row of the table.
@@ -93,9 +100,9 @@ public class ExpenseProvider extends ContentProvider {
                 selection = ExpenseContract.ExpenseEntry.COLUMN_DATE + "=? " + "AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "=?";
 
                 //get expenses/date/category
-                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length() );
+                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length());
                 //get date/category
-                strUri = strUri.substring(strUri.indexOf("/")+1);
+                strUri = strUri.substring(strUri.indexOf("/") + 1);
                 // {date, category}
                 selectionArgs = strUri.split("/");
 
@@ -106,13 +113,13 @@ public class ExpenseProvider extends ContentProvider {
                         null, null, sortOrder);
                 break;
             case EXPENSES_OR_INCOME_ONLY:
-                selection = ExpenseContract.ExpenseEntry.COLUMN_OPTION + "=? " ;
+                selection = ExpenseContract.ExpenseEntry.COLUMN_OPTION + "=? ";
 
                 // {option}
-                selectionArgs = new String[]{strUri.substring(strUri.lastIndexOf("/")+1)};
+                selectionArgs = new String[]{strUri.substring(strUri.lastIndexOf("/") + 1)};
 
                 //For this case, reutrn cursor of balances for each day
-                if(selectionArgs[0]  == "balances"){
+                if (selectionArgs[0] == "balances") {
                     cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, null, null,
                             ExpenseContract.ExpenseEntry.COLUMN_DATE, null, sortOrder);
                     return cursor;
@@ -123,19 +130,59 @@ public class ExpenseProvider extends ContentProvider {
                         null, null, sortOrder);
                 break;
             case DATE_CATEGORY_OPTION:
-                selection = ExpenseContract.ExpenseEntry.COLUMN_DATE + "=? " + "AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "=?"+ "AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "=?";
+                selection = ExpenseContract.ExpenseEntry.COLUMN_DATE + "=? " + "AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "=?" + "AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "=?";
 
 
                 //get expenses/date/category/option
-                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length() );
+                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length());
                 //get date/category/option
-                strUri = strUri.substring(strUri.indexOf("/")+1);
+                strUri = strUri.substring(strUri.indexOf("/") + 1);
                 // {date, category, option}
                 selectionArgs = strUri.split("/");
                 // This will perform a query on the expenses table where the {date, expense/income category and
                 // option} equals the selectionArgs to return a Cursor containing rows of the table.
                 cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
+
+
+                break;
+            case BUDGET_LIMIT:
+
+                //get expenses/date/category/option
+                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length());
+                //get date/category/option
+                strUri = strUri.substring(strUri.indexOf("/") + 1);
+                // {date, category, option}
+                selectionArgs = strUri.split("/");
+
+                selectionArgs[6] = "'" + selectionArgs[6] + "'";
+
+                // This will perform a query on the expenses table where the {date, expense/income category and
+                // option} equals the selectionArgs to return a Cursor containing rows of the table.
+                String sql_budget_limit = "select sum(" + ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + ") from (" +
+                        "select " + ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME + " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + "<=" + selectionArgs[0] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + "<= " + selectionArgs[1] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + "<= " + selectionArgs[2] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" + " INTERSECT " +
+                        "select " + ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME + " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + ">=" + selectionArgs[3] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + ">= " + selectionArgs[4] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + ">= " + selectionArgs[5] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" +
+                        ")";
+                cursor = database.rawQuery(sql_budget_limit, null);
+                break;
+            case BUDGET_DAYS_WITH_SPENDING:
+
+                //get expenses/date/category/option
+                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length());
+                //get date/category/option
+                strUri = strUri.substring(strUri.indexOf("/") + 1);
+                // {date, category, option}
+                selectionArgs = strUri.split("/");
+
+                selectionArgs[6] = "'" + selectionArgs[6] + "'";
+
+                // This will perform a query on the expenses table where the {date, expense/income category and
+                // option} equals the selectionArgs to return a Cursor containing rows of the table.
+                String sql_budget_days_with_spending = "select DISTINCT " + ExpenseContract.ExpenseEntry.COLUMN_DATE +  " from (" +
+                        "select " + ExpenseContract.ExpenseEntry.COLUMN_DATE + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME + " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + "<=" + selectionArgs[0] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + "<= " + selectionArgs[1] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + "<= " + selectionArgs[2] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" + " INTERSECT " +
+                        "select " + ExpenseContract.ExpenseEntry.COLUMN_DATE + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME + " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + ">=" + selectionArgs[3] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + ">= " + selectionArgs[4] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + ">= " + selectionArgs[5] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" +
+                        ")";
+                cursor = database.rawQuery(sql_budget_days_with_spending, null);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
@@ -161,8 +208,8 @@ public class ExpenseProvider extends ContentProvider {
         }
 
 
-
     }
+
     /**
      * Insert an expense into the database with the given content values. Return the new content URI
      * for that specific row in the database.
@@ -176,21 +223,21 @@ public class ExpenseProvider extends ContentProvider {
         String errorMsg = null;
 
         //Data validation for Date, Amount and Description field
-        if(day.equals("0")){
-            errorMsg = "Error: " + option  + " date not set.";
+        if (day.equals("0")) {
+            errorMsg = "Error: " + option + " date not set.";
             Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
             return null;
         }
 
-        if( amount == 0){
+        if (amount == 0) {
             errorMsg = "Error: " + option + " amount is 0.";
-            Toast.makeText(this.getContext(), errorMsg ,  Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getContext(), errorMsg, Toast.LENGTH_SHORT).show();
             return null;
         }
 
-        if(description.isEmpty()){
+        if (description.isEmpty()) {
             errorMsg = "Error: " + option + " description is empty.";
-            Toast.makeText(this.getContext(), errorMsg ,  Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getContext(), errorMsg, Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -223,14 +270,13 @@ public class ExpenseProvider extends ContentProvider {
             case EXPENSE_ID:
                 // Delete a single row given by the ID in the URI
                 selection = ExpenseContract.ExpenseEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 return database.delete(ExpenseContract.ExpenseEntry.TABLE_NAME, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
 
     }
-
 
 
     @Override
@@ -244,7 +290,7 @@ public class ExpenseProvider extends ContentProvider {
                 // so we know which row to update. Selection will be "_id=?" and selection
                 // arguments will be a String array containing the actual ID.
                 selection = ExpenseContract.ExpenseEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 return updateExpense(uri, contentValues, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Update is not supported for " + uri);
@@ -273,14 +319,14 @@ public class ExpenseProvider extends ContentProvider {
         // check that the gender value is valid.
         if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_DAY)) {
             Integer day = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_DAY);
-            if (day == null ) {
+            if (day == null) {
                 throw new IllegalArgumentException("Error: Entry requires that you select a day");
             }
         }
 
         if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_MONTH)) {
             Integer month = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_MONTH);
-            if (month == null ) {
+            if (month == null) {
                 throw new IllegalArgumentException("Error: Entry requires that you select a month");
             }
         }
@@ -293,12 +339,11 @@ public class ExpenseProvider extends ContentProvider {
         }
 
 
-
         if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT)) {
             Double amount = values.getAsDouble(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT);
-            if (amount == 0.00 ) {
+            if (amount == 0.00) {
                 throw new IllegalArgumentException("Error: Amount cannot be 0");
-            }else if (amount == null){
+            } else if (amount == null) {
                 throw new IllegalArgumentException("Error: Please enter an amount.");
             }
         }

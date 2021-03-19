@@ -21,7 +21,7 @@ public class BudgetProvider extends ContentProvider {
     //DB helper object
     private ExpenseDbHelper mDbHelper;
     private static final int BUDGET = 1;
-    private static final int EXPENSE_ID = 2;
+    private static final int BUDGET_ID = 2;
     private static final int EXPENSE_DATE_CATEGORY = 3;
     private static final int EXPENSES_OR_INCOME_ONLY = 4;
     private static final int DATE_CATEGORY_OPTION = 5;
@@ -38,7 +38,7 @@ public class BudgetProvider extends ContentProvider {
     static{
 
         sUriMatcher.addURI(BudgetContract.BudgetEntry.CONTENT_AUTHORITY, BudgetContract.BudgetEntry.PATH_BUDGET, BUDGET);
-        sUriMatcher.addURI(BudgetContract.BudgetEntry.CONTENT_AUTHORITY, BudgetContract.BudgetEntry.PATH_BUDGET + "/#", EXPENSE_ID);
+        sUriMatcher.addURI(BudgetContract.BudgetEntry.CONTENT_AUTHORITY, BudgetContract.BudgetEntry.PATH_BUDGET + "/#", BUDGET_ID);
         sUriMatcher.addURI(BudgetContract.BudgetEntry.CONTENT_AUTHORITY, BudgetContract.BudgetEntry.PATH_BUDGET + "/*" + "/*", EXPENSE_DATE_CATEGORY);
         sUriMatcher.addURI(BudgetContract.BudgetEntry.CONTENT_AUTHORITY, BudgetContract.BudgetEntry.PATH_BUDGET + "/*" , EXPENSES_OR_INCOME_ONLY);
         sUriMatcher.addURI(BudgetContract.BudgetEntry.CONTENT_AUTHORITY, BudgetContract.BudgetEntry.PATH_BUDGET + "/*" + "/*" + "/*" , DATE_CATEGORY_OPTION);
@@ -57,15 +57,15 @@ public class BudgetProvider extends ContentProvider {
         String strUri = uri.toString();
         int match = sUriMatcher.match(uri);
         switch (match) {
-//            case EXPENSE:
-//                // For the EXPENSE code, query the expense table directly with the given
-//                // projection, selection, selection arguments, and sort order. The cursor
-//                // could contain multiple rows of the expense table.
-//                // TODO: Perform database query on expense table
-//                cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
-//                        null, null, sortOrder);
-//                break;
-            case EXPENSE_ID:
+            case BUDGET:
+                // For the BUDGET code, query the expense table directly with the given
+                // projection, selection, selection arguments, and sort order. The cursor
+                // could contain multiple rows of the expense table.
+                // TODO: Perform database query on expense table
+                cursor = database.query(BudgetContract.BudgetEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+            case BUDGET_ID:
                 // For the EXPENSE_ID code, extract out the ID from the URI.
                 // For an example URI such as "content://com.example.android.budgetapplication/expense/3",
                 // the selection will be "_id=?" and the selection argument will be a
@@ -74,12 +74,12 @@ public class BudgetProvider extends ContentProvider {
                 // For every "?" in the selection, we need to have an element in the selection
                 // arguments that will fill in the "?". Since we have 1 question mark in the
                 // selection, we have 1 String in the selection arguments' String array.
-                selection = ExpenseContract.ExpenseEntry._ID + "=?";
+                selection = BudgetContract.BudgetEntry._ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
 
                 // This will perform a query on the expenses table where the _id equals x to return a
                 // Cursor containing that row of the table.
-                cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
+                cursor = database.query(BudgetContract.BudgetEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
             case EXPENSE_DATE_CATEGORY:
@@ -215,20 +215,19 @@ public class BudgetProvider extends ContentProvider {
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
         final int match = sUriMatcher.match(uri);
-//        switch (match) {
-//            case EXPENSE:
-//                // Delete all rows that match the selection and selection args
-//                return database.delete(ExpenseContract.ExpenseEntry.TABLE_NAME, selection, selectionArgs);
-//            case EXPENSE_ID:
-//                // Delete a single row given by the ID in the URI
-//                selection = ExpenseContract.ExpenseEntry._ID + "=?";
-//                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
-//                return database.delete(ExpenseContract.ExpenseEntry.TABLE_NAME, selection, selectionArgs);
-//            default:
-//                throw new IllegalArgumentException("Deletion is not supported for " + uri);
-//        }
-//remove when implement for budget
-        return 1;
+        switch (match) {
+            case BUDGET:
+                // Delete all rows that match the selection and selection args
+                return database.delete(ExpenseContract.ExpenseEntry.TABLE_NAME, selection, selectionArgs);
+            case BUDGET_ID:
+                // Delete a single row given by the ID in the URI
+                selection = BudgetContract.BudgetEntry._ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                return database.delete(BudgetContract.BudgetEntry.TABLE_NAME, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
+
     }
 
 
@@ -236,22 +235,21 @@ public class BudgetProvider extends ContentProvider {
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String selection, @Nullable String[] selectionArgs) {
         final int match = sUriMatcher.match(uri);
-//        switch (match) {
-//            case EXPENSE:
-//                return updateExpense(uri, contentValues, selection, selectionArgs);
-//            case EXPENSE_ID:
-//                // For the EXPENSE_ID code, extract out the ID from the URI,
-//                // so we know which row to update. Selection will be "_id=?" and selection
-//                // arguments will be a String array containing the actual ID.
-//                selection = ExpenseContract.ExpenseEntry._ID + "=?";
-//                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
-//                return updateExpense(uri, contentValues, selection, selectionArgs);
-//            default:
-//                throw new IllegalArgumentException("Update is not supported for " + uri);
-//        }
+        switch (match) {
+            case BUDGET:
+                return updateBudget(uri, contentValues, selection, selectionArgs);
+            case BUDGET_ID:
+                // For the EXPENSE_ID code, extract out the ID from the URI,
+                // so we know which row to update. Selection will be "_id=?" and selection
+                // arguments will be a String array containing the actual ID.
+                selection = BudgetContract.BudgetEntry._ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                return updateBudget(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+          }
 
-        //remove when implement for budget
-        return 1;
+
     }
 
     /**
@@ -259,64 +257,64 @@ public class BudgetProvider extends ContentProvider {
      * specified in the selection and selection arguments (which could be 0 or 1 or more expenses).
      * Return the number of rows that were successfully updated.
      */
-    private int updateExpense(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    private int updateBudget(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 
         //Check existing row values.
         // If the {@link ExpenseContract.ExpenseEntry.COLUMN_OPTION} key is present,
         // check that the name value is not null.
-        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_OPTION)) {
-            String option = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_OPTION);
-            if (option == null) {
-                throw new IllegalArgumentException("Error: Entry requires an option (Income/Expense)");
-            }
-        }
+//        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_OPTION)) {
+//            String option = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_OPTION);
+//            if (option == null) {
+//                throw new IllegalArgumentException("Error: Entry requires an option (Income/Expense)");
+//            }
+//        }
+//
+//        // If the {@link PetEntry#COLUMN_PET_GENDER} key is present,
+//        // check that the gender value is valid.
+//        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_DAY)) {
+//            Integer day = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_DAY);
+//            if (day == null ) {
+//                throw new IllegalArgumentException("Error: Entry requires that you select a day");
+//            }
+//        }
+//
+//        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_MONTH)) {
+//            Integer month = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_MONTH);
+//            if (month == null ) {
+//                throw new IllegalArgumentException("Error: Entry requires that you select a month");
+//            }
+//        }
+//
+//        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_YEAR)) {
+//            Integer year = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_YEAR);
+//            if (year == null) {
+//                throw new IllegalArgumentException("Error: Entry requires that you select a year)");
+//            }
+//        }
 
-        // If the {@link PetEntry#COLUMN_PET_GENDER} key is present,
-        // check that the gender value is valid.
-        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_DAY)) {
-            Integer day = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_DAY);
-            if (day == null ) {
-                throw new IllegalArgumentException("Error: Entry requires that you select a day");
-            }
-        }
 
-        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_MONTH)) {
-            Integer month = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_MONTH);
-            if (month == null ) {
-                throw new IllegalArgumentException("Error: Entry requires that you select a month");
-            }
-        }
-
-        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_YEAR)) {
-            Integer year = values.getAsInteger(ExpenseContract.ExpenseEntry.COLUMN_YEAR);
-            if (year == null) {
-                throw new IllegalArgumentException("Error: Entry requires that you select a year)");
-            }
-        }
-
-
-
-        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT)) {
-            Double amount = values.getAsDouble(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT);
-            if (amount == 0.00 ) {
-                throw new IllegalArgumentException("Error: Amount cannot be 0");
-            }else if (amount == null){
-                throw new IllegalArgumentException("Error: Please enter an amount.");
-            }
-        }
-        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_CATEGORY)) {
-            String category = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_CATEGORY);
-            if (category == null) {
-                throw new IllegalArgumentException("Error: Entry requires that you select a category)");
-            }
-        }
-
-        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_DATE)) {
-            String date = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_DATE);
-            if (date == null) {
-                throw new IllegalArgumentException("Error: Entry requires that you select a date)");
-            }
-        }
+//
+//        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT)) {
+//            Double amount = values.getAsDouble(ExpenseContract.ExpenseEntry.COLUMN_AMOUNT);
+//            if (amount == 0.00 ) {
+//                throw new IllegalArgumentException("Error: Amount cannot be 0");
+//            }else if (amount == null){
+//                throw new IllegalArgumentException("Error: Please enter an amount.");
+//            }
+//        }
+//        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_CATEGORY)) {
+//            String category = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_CATEGORY);
+//            if (category == null) {
+//                throw new IllegalArgumentException("Error: Entry requires that you select a category)");
+//            }
+//        }
+//
+//        if (values.containsKey(ExpenseContract.ExpenseEntry.COLUMN_DATE)) {
+//            String date = values.getAsString(ExpenseContract.ExpenseEntry.COLUMN_DATE);
+//            if (date == null) {
+//                throw new IllegalArgumentException("Error: Entry requires that you select a date)");
+//            }
+//        }
 
 //        // If the {@link PetEntry#COLUMN_PET_WEIGHT} key is present,
 //        // check that the weight value is valid.
@@ -337,7 +335,7 @@ public class BudgetProvider extends ContentProvider {
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
         // Returns the number of database rows affected by the update statement
-        return database.update(ExpenseContract.ExpenseEntry.TABLE_NAME, values, selection, selectionArgs);
+        return database.update(BudgetContract.BudgetEntry.TABLE_NAME, values, selection, selectionArgs);
 
     }
 
