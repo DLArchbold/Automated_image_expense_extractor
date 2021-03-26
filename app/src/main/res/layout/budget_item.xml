@@ -58,7 +58,7 @@
         <TextView
             android:id="@+id/limit"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
 
             android:layout_weight="1"
@@ -66,13 +66,15 @@
 
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/income"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"/>
 
         <TextView
             android:id="@+id/spent"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
 
             android:layout_weight="1"
@@ -81,6 +83,8 @@
 
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/expenses"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_marginBottom="16dp"/>
 
     </LinearLayout>
@@ -95,13 +99,15 @@
         <TextView
             android:id="@+id/category"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:layout_gravity="center_horizontal"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="#2B3D4D"
             android:layout_weight="1"
             android:layout_marginRight="16dp"
+            android:layout_marginLeft="16dp"
+
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"/>
         <TextView
