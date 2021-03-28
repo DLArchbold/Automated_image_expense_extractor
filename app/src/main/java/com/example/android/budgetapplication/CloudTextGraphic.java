@@ -30,8 +30,8 @@ import java.util.List;
  */
 public class CloudTextGraphic extends Graphic {
     private static final int TEXT_COLOR = Color.GREEN;
-    private static final float TEXT_SIZE = 60.0f;
-    private static final float STROKE_WIDTH = 5.0f;
+    private static final float TEXT_SIZE = 30.0f;
+    private static final float STROKE_WIDTH = 2.0f;
 
     private final Paint rectPaint;
     private final Paint textPaint;
@@ -52,7 +52,10 @@ public class CloudTextGraphic extends Graphic {
         textPaint = new Paint();
         textPaint.setColor(TEXT_COLOR);
         textPaint.setTextSize(TEXT_SIZE);
+
+
         // Redraw the overlay, as this graphic has been added.
+        //Invalidate view from non-UI thread. Update view in next eventloop
         postInvalidate();
     }
 
@@ -65,16 +68,25 @@ public class CloudTextGraphic extends Graphic {
             throw new IllegalStateException("Attempting to draw a null text.");
         }
 
-        float x = overlay.getWidth() / 4.0f;
-        float y = overlay.getHeight() / 4.0f;
+        float x = overlay.getWidth() / 1.0f;
+        float y = overlay.getHeight() / 1.0f;
 
         StringBuilder wordStr = new StringBuilder();
+        //Draw bounding box
         Rect wordRect = word.getBoundingBox();
-        canvas.drawRect(wordRect, rectPaint);
+        wordRect.right = (int) (wordRect.right/2);
+        wordRect.top = (int)(wordRect.top/4);
+        //canvas.drawRect(wordRect, rectPaint);
+
+        //Draw word
+        //Iterate over all symbols/characters
         List<FirebaseVisionDocumentText.Symbol> symbols = word.getSymbols();
         for (int m = 0; m < symbols.size(); m++) {
             wordStr.append(symbols.get(m).getText());
         }
-        canvas.drawText(wordStr.toString(), wordRect.left, wordRect.bottom, textPaint);
+
+        //view uses canvas to draw itself
+        canvas.drawText(wordStr.toString(), (float)(wordRect.left-(x*0.2)), (float)(wordRect.bottom-(y*0.3)), textPaint);
+
     }
 }

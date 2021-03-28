@@ -102,18 +102,20 @@ public class GraphicOverlay extends View {
          * Adjusts the x coordinate from the preview's coordinate system to the view coordinate system.
          */
         public float translateX(float x) {
-            if (overlay.facing == CameraCharacteristics.LENS_FACING_FRONT) {
-                return overlay.getWidth() - scaleX(x);
-            } else {
-                return scaleX(x);
-            }
+//            if (overlay.facing == CameraCharacteristics.LENS_FACING_FRONT) {
+//                return overlay.getWidth() - scaleX(x);
+//            } else {
+//                return scaleX(x);
+//            }
+
+            return x;
         }
 
         /**
          * Adjusts the y coordinate from the preview's coordinate system to the view coordinate system.
          */
         public float translateY(float y) {
-            return scaleY(y);
+            return y;
         }
 
         public void postInvalidate() {

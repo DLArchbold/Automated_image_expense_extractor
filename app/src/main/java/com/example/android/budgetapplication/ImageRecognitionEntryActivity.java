@@ -19,8 +19,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.*;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -58,9 +59,16 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ImageRecognitionEntryActivity extends AppCompatActivity {
+
+    String[] sumKeywords = new String[]{"total", "subtotal", "sub-total", "sub total",   "due",
+    "amount", "totl", "tl" };
 
     private GraphicOverlay mGraphicOverlay;
 
@@ -103,6 +111,7 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        //Check if got activity to handle this intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
             try{
@@ -232,6 +241,9 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
             return;
         }
         mGraphicOverlay.clear();
+
+        Set<FirebaseVisionDocumentText.Word> matchedKeywords = new HashSet<>();
+
         List<FirebaseVisionDocumentText.Block> blocks = text.getBlocks();
         for (int i = 0; i < blocks.size(); i++) {
             List<FirebaseVisionDocumentText.Paragraph> paragraphs = blocks.get(i).getParagraphs();
@@ -241,11 +253,116 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
 
 
                     Log.e("MainActivity", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
+
+                    String currentWord = words.get(l).getText().toString();
+                    currentWord = currentWord.toLowerCase();
+
+
+
+
+                    /*Only care there is match, don't matter match which one, since
+                    we will sort LinkedHashMap acc to lowest coordinates then
+                     check again if got matching sum value*/
+                    for(String keyWords : sumKeywords){
+                        if(currentWord.contains(keyWords)){
+                            matchedKeywords.add(words.get(l));
+                            break;
+                        }
+                    }
+
+
+
                     CloudTextGraphic cloudDocumentTextGraphic = new CloudTextGraphic(mGraphicOverlay,
                             words.get(l));
                     mGraphicOverlay.add(cloudDocumentTextGraphic);
                 }
             }
         }
+
+        //After checked all blocks..words
+        List<FirebaseVisionDocumentText.Word> wordList = new ArrayList<>();
+        for(FirebaseVisionDocumentText.Word word: matchedKeywords){
+            wordList.add(word);
+        }
+
+
+
+        //Sort hash set
+        Collections.sort( wordList, new Comparator<FirebaseVisionDocumentText.Word>(){
+            @Override
+            public int compare(FirebaseVisionDocumentText.Word o1, FirebaseVisionDocumentText.Word o2){
+
+                //Return box with highest y value as lowest keyword in receipt, likeliest to be sum/Total
+                //Sort in decreasing order
+                return Double.compare(o1.getBoundingBox().exactCenterY(), o2.getBoundingBox().exactCenterY())*-1;
+
+            }
+
+
+        });
+
+
+
+        //
+//        FirebaseVisionDocumentText.Word chosenWord;
+//        for(FirebaseVisionDocumentText.Word word: wordList){
+//            //Check for (non) white space for number bboxes in range
+//            if(word.getText().toString().trim().length()>0){
+//                chosenWord = word;
+//            }
+//        }
+
+        String chosenWord = new String();
+        boolean breakFlag = false;
+        for(FirebaseVisionDocumentText.Word keyWord: wordList){
+
+            for (int i = 0; i < blocks.size(); i++) {
+                List<FirebaseVisionDocumentText.Paragraph> paragraphs = blocks.get(i).getParagraphs();
+                for (int j = 0; j < paragraphs.size(); j++) {
+                    List<FirebaseVisionDocumentText.Word> words = paragraphs.get(j).getWords();
+                    for (int l = 0; l < words.size(); l++) {
+
+
+                        Log.e("MainActivity", "!!!!!!!!!!!!Check for values in y range!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
+                        int keyWordTopCoordinates = keyWord.getBoundingBox().top;
+                        int keyWordBottomCoordinates = keyWord.getBoundingBox().bottom;
+                        double threshold = keyWord.getBoundingBox().height()*0.15 + keyWordBottomCoordinates;
+
+                        int wordBottom = words.get(l).getBoundingBox().bottom;
+                         if(wordBottom>= keyWordTopCoordinates && wordBottom <=threshold ){
+                             //Check if text is format 2dp
+                             String wordOfInterest = words.get(l).getText().toString();
+
+                             if(wordOfInterest.contains(".") ){
+                                 boolean is2dp = wordOfInterest.substring(wordOfInterest.lastIndexOf(".")).length()>2;
+                                 if(is2dp){
+                                     chosenWord = wordOfInterest;
+                                     breakFlag = true;
+                                     break;
+                                 }
+
+                             }
+
+                         }
+                    }
+
+                }
+                if(breakFlag == true)
+                    break;
+            }
+            if(breakFlag == true)
+                break;
+        }
+
+
+        //Extract chosenWord sum value:
+        chosenWord = chosenWord.toLowerCase();
+        if(chosenWord.contains("rm")){
+            chosenWord = chosenWord.replace("rm", "");
+        }
+        chosenWord = chosenWord.trim();
+
+
+
     }
 }
