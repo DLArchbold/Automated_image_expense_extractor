@@ -26,6 +26,7 @@ import java.util.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.viewpager.widget.PagerAdapter;
 
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
@@ -70,7 +71,13 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
     String[] sumKeywords = new String[]{"total", "subtotal", "sub-total", "sub total",   "due",
     "amount", "totl", "tl" };
 
+    String sumAmount;
+
+    String[] dateSymbols = new String[]{".", "/", "-", "'", ","};
+
     private GraphicOverlay mGraphicOverlay;
+
+    String date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,15 +249,19 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
         }
         mGraphicOverlay.clear();
 
-        Set<FirebaseVisionDocumentText.Word> matchedKeywords = new HashSet<>();
+        boolean sumDetectedFlag = false;
 
+        Set<FirebaseVisionDocumentText.Word> matchedKeywords = new HashSet<>();
+        List<String> potentialDates = new ArrayList<>();
         List<FirebaseVisionDocumentText.Block> blocks = text.getBlocks();
+
+
         for (int i = 0; i < blocks.size(); i++) {
             List<FirebaseVisionDocumentText.Paragraph> paragraphs = blocks.get(i).getParagraphs();
             for (int j = 0; j < paragraphs.size(); j++) {
                 List<FirebaseVisionDocumentText.Word> words = paragraphs.get(j).getWords();
                 for (int l = 0; l < words.size(); l++) {
-
+                    sumDetectedFlag = false;
 
                     Log.e("MainActivity", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
 
@@ -259,17 +270,40 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
 
 
 
-
+                    //Check for sum
                     /*Only care there is match, don't matter match which one, since
-                    we will sort LinkedHashMap acc to lowest coordinates then
+                    we will sort List of .Words according to lowest coordinates then
                      check again if got matching sum value*/
                     for(String keyWords : sumKeywords){
                         if(currentWord.contains(keyWords)){
                             matchedKeywords.add(words.get(l));
+                            sumDetectedFlag = true;
                             break;
                         }
                     }
 
+
+
+                    //Check for date
+                    if(sumDetectedFlag == false){
+                        for(String dateSymbol: dateSymbols){
+
+                            if(currentWord.contains(dateSymbol)){
+                                currentWord = currentWord.trim();
+                                potentialDates.add(currentWord);
+                                //Break only if a date, otherwise might be phone number, address etc.
+                                if(currentWord.indexOf(dateSymbol) != currentWord.lastIndexOf(dateSymbol)){
+                                    date = currentWord;
+                                    date = date.replace(" ", "");
+                                    Log.e("MainActivity", "!!!!!!!!!!!!!!matchedDate!!!!!!!!!!!!!" + currentWord);
+                                    break;
+                                }
+
+                            }
+
+
+                        }
+                    }
 
 
                     CloudTextGraphic cloudDocumentTextGraphic = new CloudTextGraphic(mGraphicOverlay,
@@ -278,6 +312,40 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                 }
             }
         }
+
+        if(date == null){
+            date = getDate(potentialDates);
+        }
+
+        getSumAmount(matchedKeywords, blocks);
+
+
+
+
+
+
+    }
+
+    public String getDate(List<String> potentialDates){
+
+        // . / and - who have 1 occurence in string are not
+        //dates, but ' and , are possibly dates
+        for(String possibleDate: potentialDates){
+            if(possibleDate.contains(",")){
+
+            }
+
+
+
+        }
+
+
+
+        return null;
+    }
+
+    public void getSumAmount(Set<FirebaseVisionDocumentText.Word> matchedKeywords, List<FirebaseVisionDocumentText.Block> blocks){
+
 
         //After checked all blocks..words
         List<FirebaseVisionDocumentText.Word> wordList = new ArrayList<>();
@@ -329,21 +397,21 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                         double threshold = keyWord.getBoundingBox().height()*0.15 + keyWordBottomCoordinates;
 
                         int wordBottom = words.get(l).getBoundingBox().bottom;
-                         if(wordBottom>= keyWordTopCoordinates && wordBottom <=threshold ){
-                             //Check if text is format 2dp
-                             String wordOfInterest = words.get(l).getText().toString();
+                        if(wordBottom>= keyWordTopCoordinates && wordBottom <=threshold ){
+                            //Check if text is format 2dp
+                            String wordOfInterest = words.get(l).getText().toString();
 
-                             if(wordOfInterest.contains(".") ){
-                                 boolean is2dp = wordOfInterest.substring(wordOfInterest.lastIndexOf(".")).length()>2;
-                                 if(is2dp){
-                                     chosenWord = wordOfInterest;
-                                     breakFlag = true;
-                                     break;
-                                 }
+                            if(wordOfInterest.contains(".") ){
+                                boolean is2dp = wordOfInterest.substring(wordOfInterest.lastIndexOf(".")).length()>2;
+                                if(is2dp){
+                                    chosenWord = wordOfInterest;
+                                    breakFlag = true;
+                                    break;
+                                }
 
-                             }
+                            }
 
-                         }
+                        }
                     }
 
                 }
@@ -362,7 +430,9 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
         }
         chosenWord = chosenWord.trim();
 
-
+        sumAmount = chosenWord;
 
     }
+
+
 }
