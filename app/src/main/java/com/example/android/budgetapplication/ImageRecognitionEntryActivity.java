@@ -6,6 +6,7 @@ import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.UserDictionary;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -65,15 +66,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 public class ImageRecognitionEntryActivity extends AppCompatActivity {
 
     String[] sumKeywords = new String[]{"total", "subtotal", "sub-total", "sub total",   "due",
-    "amount", "totl", "tl" };
-
+            "amount", "totl", "tl", "amt" , "nett", "jumlah", "sum"};
+//    String[] sumKeywords = new String[]{"total", "subtotal", "sub-total", "sub total",   "due",
+//            "amount", "totl", "tl", "amt" , "nett", "rm"};
     String sumAmount;
 
-    String[] dateSymbols = new String[]{".", "/", "-", "'", ","};
+    String[] dateSymbols = new String[]{".", "/", "-", "'"};
 
     private GraphicOverlay mGraphicOverlay;
 
@@ -250,22 +253,28 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
         mGraphicOverlay.clear();
 
         boolean sumDetectedFlag = false;
-
         Set<FirebaseVisionDocumentText.Word> matchedKeywords = new HashSet<>();
         List<String> potentialDates = new ArrayList<>();
+        boolean dateDetected = false;
+        String prevWord = null;
+        String[] potentialSingleDate = new String[3];
+        boolean spacesDate = false;
+        boolean furtherProcessDate = true;
+
         List<FirebaseVisionDocumentText.Block> blocks = text.getBlocks();
-
-
         for (int i = 0; i < blocks.size(); i++) {
             List<FirebaseVisionDocumentText.Paragraph> paragraphs = blocks.get(i).getParagraphs();
             for (int j = 0; j < paragraphs.size(); j++) {
                 List<FirebaseVisionDocumentText.Word> words = paragraphs.get(j).getWords();
                 for (int l = 0; l < words.size(); l++) {
                     sumDetectedFlag = false;
-
                     Log.e("MainActivity", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
 
                     String currentWord = words.get(l).getText().toString();
+                    if(currentWord.equals("09.11.2018") || currentWord.equals("09-11-2018")){
+                        int test = 0;
+                        System.out.println("found 09.11.2018");
+                    }
                     currentWord = currentWord.toLowerCase();
 
 
@@ -275,37 +284,126 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                     we will sort List of .Words according to lowest coordinates then
                      check again if got matching sum value*/
                     for(String keyWords : sumKeywords){
-                        if(currentWord.contains(keyWords)){
-                            matchedKeywords.add(words.get(l));
-                            sumDetectedFlag = true;
-                            break;
+                        if(currentWord.contains(keyWords) ){
+                            if(prevWord !=null && (!prevWord.equals("change") && !prevWord.equals("baki"))){
+                                matchedKeywords.add(words.get(l));
+                                sumDetectedFlag = true;
+                                break;
+                            }
+
                         }
                     }
 
 
 
-                    //Check for date
-                    if(sumDetectedFlag == false){
+                    //Check for date, 1. symbols case & 2. no symbol cases
+                    if(sumDetectedFlag == false && dateDetected == false){
+                        currentWord = currentWord.trim();
+                        currentWord = currentWord.replace(" ", "");
+                        //Check for symbols case
                         for(String dateSymbol: dateSymbols){
 
                             if(currentWord.contains(dateSymbol)){
-                                currentWord = currentWord.trim();
-                                potentialDates.add(currentWord);
+
                                 //Break only if a date, otherwise might be phone number, address etc.
-                                if(currentWord.indexOf(dateSymbol) != currentWord.lastIndexOf(dateSymbol)){
-                                    date = currentWord;
-                                    date = date.replace(" ", "");
+                                //Check for date, 2 symbols case
+                                boolean firstAndLastAreDigits = Character.isDigit(currentWord.charAt(0)) && Character.isDigit(currentWord.charAt(currentWord.length()-1));
+                                boolean twoSeparatedSymbols = currentWord.indexOf(dateSymbol) != currentWord.lastIndexOf(dateSymbol);
+
+                                if( twoSeparatedSymbols && firstAndLastAreDigits && checkIfDateFormat(currentWord, dateSymbol)){
+                                    //Dates with 2 symbols, but not necessarily in dd/mm/yyyy
+
+                                    potentialDates.add(currentWord);
+                                    date = getDate(currentWord, dateSymbol);
                                     Log.e("MainActivity", "!!!!!!!!!!!!!!matchedDate!!!!!!!!!!!!!" + currentWord);
+                                    dateDetected = true;
+                                    furtherProcessDate = true;
                                     break;
                                 }
 
                             }
+                        }
 
+                        //Check for no symbols case
+                        if(dateDetected == false){
+                            boolean monthNameFound = false;
+                            Matcher matcher = Pattern.compile("(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)").matcher(currentWord);
+                            int matchStart = 0;
+                            int matchEnd = 0;
+                            while (matcher.find()){
+                                matchStart = matcher.start();
+                                matchEnd = matcher.end()-1;
+                                monthNameFound = true;
+                            }
+                            //boolean monthNameFound = Pattern.compile("\\?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?").matcher(currentWord).find();
+                            //boolean monthNameFound = Pattern.compile("\\?:jan(\\?:uary)\\?|feb(\\?:ruary)\\?|mar(\\?:ch)\\?|apr(\\?:il)\\?|may|jun(\\?:e)\\?|jul(\\?:y)\\?|aug(\\?:ust)\\?|sep(\\?:tember)\\?|oct(\\?:ober)\\?|nov(\\?:ember)\\?|dec(\\?:ember)\\?").matcher(currentWord).find();
+                            if(monthNameFound == true){
+
+
+                                //CHANGE MONTHNAMEFOUND TO LOOP AND GET START AND END INDEX, THEN CHECK FOR START-1 AND END+1 ARE
+                                //NUMBERS FOR NO SPACE CASE
+
+                                if(matchStart-1 >= 0 && matchEnd+1< currentWord.length() && Character.isDigit(currentWord.charAt(matchStart-1)) && Character.isDigit(currentWord.charAt(matchEnd+1))) {
+
+                                    //no spaces case
+                                   /* int lPtr = 0;
+                                    int rPtr = currentWord.length()-1;
+                                    lPtr =0;
+                                    rPtr =currentWord.length()-1;
+
+                                    while(Character.isDigit(currentWord.charAt(lPtr))){
+                                        lPtr++;
+                                    }
+                                    while (Character.isDigit((currentWord.charAt(rPtr)))) {
+                                        rPtr--;
+                                    }
+                                    //Get month
+                                    potentialSingleDate[1] = currentWord.substring(lPtr, rPtr+1);
+                                    //Get Day
+                                    potentialSingleDate[0] = currentWord.substring(0, lPtr);
+                                    //Get year
+                                    potentialSingleDate[2] = currentWord.substring(rPtr+1);*/
+                                    //Get month
+                                    potentialSingleDate[1] = currentWord.substring(matchStart, matchEnd+1);
+                                    //Get Day
+                                    potentialSingleDate[0] = currentWord.substring(0, matchStart);
+                                    //Get year
+                                    potentialSingleDate[2] = currentWord.substring(matchEnd+1);
+
+                                    dateDetected =true;
+                                    furtherProcessDate = false;
+                                }else if(matchEnd-matchStart+1 == currentWord.length() && Character.isDigit(prevWord.charAt(0))){
+                                    //THEN CHECK IF END-START+1 IS SIZE OF whole string FOR SPACE CASE
+                                    //And check if prevWord is numeric
+                                    //spaces case
+                                    //Got spaces
+                                    //Set month
+                                    potentialSingleDate[1] = currentWord;
+                                    //Set day
+                                    potentialSingleDate[0] = prevWord;
+                                    spacesDate = true;
+                                    dateDetected =true;
+                                    furtherProcessDate = false;
+                                }
+
+
+                            }
 
                         }
                     }
 
+                    //If known is no symbols case-> got spaces, just set currentWord as year
+                    if(sumDetectedFlag == false && dateDetected == true &&  spacesDate == true && Character.isDigit(currentWord.charAt(0))){
+                        //set year
+                        potentialSingleDate[2] = currentWord;
+                        spacesDate = false;
+                    }
 
+
+
+
+
+                    prevWord = currentWord;
                     CloudTextGraphic cloudDocumentTextGraphic = new CloudTextGraphic(mGraphicOverlay,
                             words.get(l));
                     mGraphicOverlay.add(cloudDocumentTextGraphic);
@@ -313,35 +411,72 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
             }
         }
 
-        if(date == null){
-            date = getDate(potentialDates);
+        if(furtherProcessDate == true){
+            //date = getDate(potentialDates);
+        }else{
+            date = potentialSingleDate[0] + "/" + potentialSingleDate[1] + "/" + potentialSingleDate[2];
+            //System.out.println("this is date: " +date);
         }
 
         getSumAmount(matchedKeywords, blocks);
 
 
-
+        System.out.println("date: " + date + " sumAmount: " + sumAmount);
 
 
 
     }
 
-    public String getDate(List<String> potentialDates){
-
-        // . / and - who have 1 occurence in string are not
-        //dates, but ' and , are possibly dates
-        for(String possibleDate: potentialDates){
-            if(possibleDate.contains(",")){
-
+    public boolean checkIfDateFormat(String currentWord, String dateSymbol){
+        //Check for 2-2, 2-4, or 4-2 format exists
+        String firstPart = currentWord.substring(0, currentWord.indexOf(dateSymbol));
+        String lastPart = currentWord.substring(currentWord.lastIndexOf(dateSymbol)+1);
+        boolean twoTwo = (firstPart.length() == 2 && lastPart.length() == 2);
+        boolean twoFour = (firstPart.length() == 2 && lastPart.length() == 4);
+        boolean fourTwo = (firstPart.length() == 4 && lastPart.length() == 2);
+        int dateSymbolCounter = 0;
+        for(int i = 0 ; i<currentWord.length(); i++){
+            if (currentWord.charAt(i) == dateSymbol.charAt(0)){
+                dateSymbolCounter++;
             }
+        }
+        if ((twoTwo || twoFour || fourTwo) && dateSymbolCounter == 2){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public String getDate(String currentWord, String dateSymbol){
+
+        String[] dateParts = currentWord.split(dateSymbol, 0);
+        String day;
+        String month;
+        String year;
+
+        if(dateParts != null){
 
 
+        month = dateParts[1];
 
+        //Check if year comes last or first
+        if (dateParts[0].length() == 4){
+            //year comes first
+            year = dateParts[0];
+            day = dateParts[2];
+        }else{
+            //year comes last
+            year = dateParts[2];
+            day = dateParts[0];
         }
 
 
 
-        return null;
+        return (day + "/" + month + "/" + year);
+        }else{
+            return null;
+        }
+
     }
 
     public void getSumAmount(Set<FirebaseVisionDocumentText.Word> matchedKeywords, List<FirebaseVisionDocumentText.Block> blocks){
@@ -394,17 +529,29 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                         Log.e("MainActivity", "!!!!!!!!!!!!Check for values in y range!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
                         int keyWordTopCoordinates = keyWord.getBoundingBox().top;
                         int keyWordBottomCoordinates = keyWord.getBoundingBox().bottom;
-                        double threshold = keyWord.getBoundingBox().height()*0.15 + keyWordBottomCoordinates;
+                        double thresholdBottom = keyWord.getBoundingBox().height()*0.25 + keyWordBottomCoordinates;
+                        double thresholdTop = keyWordTopCoordinates -keyWord.getBoundingBox().height()*0.05 ;
 
-                        int wordBottom = words.get(l).getBoundingBox().bottom;
-                        if(wordBottom>= keyWordTopCoordinates && wordBottom <=threshold ){
+                        int potentialSumBottom = words.get(l).getBoundingBox().bottom;
+                        if(words.get(l).getText().toString().equals("316.0")){
+                            System.out.println("found 316.0");
+                        }
+
+                        String sumWord = keyWord.getText();
+
+                        if(potentialSumBottom>= thresholdTop && potentialSumBottom <=thresholdBottom ){
                             //Check if text is format 2dp
-                            String wordOfInterest = words.get(l).getText().toString();
+                            String potentialSum = words.get(l).getText().toString();
 
-                            if(wordOfInterest.contains(".") ){
-                                boolean is2dp = wordOfInterest.substring(wordOfInterest.lastIndexOf(".")).length()>2;
-                                if(is2dp){
-                                    chosenWord = wordOfInterest;
+                            boolean potentialSumIsDecimal =potentialSum.contains(".");
+
+                            if(potentialSumIsDecimal ){
+                                boolean is2dp = potentialSum.substring(potentialSum.lastIndexOf(".")).length()>2;
+                                boolean potentialSumIsMoreThan0 = !potentialSum.substring(0, potentialSum.indexOf(".")).equals("0");
+                                boolean potentialSumDecimalMoreThan0 = !potentialSum.substring(potentialSum.indexOf(".")).equals("0");
+                                if(is2dp && (potentialSumIsMoreThan0 || potentialSumDecimalMoreThan0) ){
+                                    chosenWord = potentialSum;
+                                    Log.e("MainActivity", "!!!!!!!!!!!!found sum!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
                                     breakFlag = true;
                                     break;
                                 }
