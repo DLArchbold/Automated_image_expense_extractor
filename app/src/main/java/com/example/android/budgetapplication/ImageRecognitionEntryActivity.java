@@ -159,6 +159,7 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
 
 
     String currentPhotoPath;
+    String[] automatedValues = new String[4];
 
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -260,6 +261,7 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
         String[] potentialSingleDate = new String[3];
         boolean spacesDate = false;
         boolean furtherProcessDate = true;
+        int interestL = 0;
 
         List<FirebaseVisionDocumentText.Block> blocks = text.getBlocks();
         for (int i = 0; i < blocks.size(); i++) {
@@ -271,9 +273,9 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                     Log.e("MainActivity", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
 
                     String currentWord = words.get(l).getText().toString();
-                    if(currentWord.equals("09.11.2018") || currentWord.equals("09-11-2018")){
+                    if(currentWord.equals("February")){
                         int test = 0;
-                        System.out.println("found 09.11.2018");
+                        System.out.println("found February");
                     }
                     currentWord = currentWord.toLowerCase();
 
@@ -372,6 +374,7 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
 
                                     dateDetected =true;
                                     furtherProcessDate = false;
+                                    interestL = l;
                                 }else if(matchEnd-matchStart+1 == currentWord.length() && Character.isDigit(prevWord.charAt(0))){
                                     //THEN CHECK IF END-START+1 IS SIZE OF whole string FOR SPACE CASE
                                     //And check if prevWord is numeric
@@ -384,6 +387,7 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                                     spacesDate = true;
                                     dateDetected =true;
                                     furtherProcessDate = false;
+                                    interestL = l;
                                 }
 
 
@@ -393,10 +397,21 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                     }
 
                     //If known is no symbols case-> got spaces, just set currentWord as year
-                    if(sumDetectedFlag == false && dateDetected == true &&  spacesDate == true && Character.isDigit(currentWord.charAt(0))){
+                    if(sumDetectedFlag == false && dateDetected == true &&  spacesDate == true && Character.isDigit(currentWord.charAt(0))  ){
                         //set year
-                        potentialSingleDate[2] = currentWord;
+                        int currentWordLength = currentWord.length();
+                        Character curWordFirstChar = currentWord.charAt(0);
+                        Character curWordLastChar = currentWord.charAt(currentWordLength-1);
+                        boolean isNumber = Character.isDigit(curWordFirstChar) && Character.isDigit(curWordFirstChar);
+                        if((currentWordLength == 2 || currentWordLength == 4) && isNumber && l == interestL+1){
+                            potentialSingleDate[2] = currentWord;
+
+                        }else{
+                            dateDetected = false;
+                            interestL = 0;
+                        }
                         spacesDate = false;
+
                     }
 
 
@@ -411,22 +426,82 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
             }
         }
 
-        if(furtherProcessDate == true){
-            //date = getDate(potentialDates);
-        }else{
-            date = potentialSingleDate[0] + "/" + potentialSingleDate[1] + "/" + potentialSingleDate[2];
-            //System.out.println("this is date: " +date);
-        }
+       if(furtherProcessDate == false){
+           date = potentialSingleDate[0] + "/" + potentialSingleDate[1] + "/" + potentialSingleDate[2];
+           //System.out.println("this is date: " +date);
+       }
 
-        getSumAmount(matchedKeywords, blocks);
 
+
+
+        sumAmount = getSumAmount(matchedKeywords, blocks);
+        automatedValues = formatDate(date, automatedValues);
+        automatedValues[3] = sumAmount;
 
         System.out.println("date: " + date + " sumAmount: " + sumAmount);
-
+        Intent manualEntryActivityIntent = new Intent(this, ManualEntryActivity.class);
+        manualEntryActivityIntent.putExtra("automatedValues", automatedValues);
+        startActivity(manualEntryActivityIntent);
 
 
     }
 
+    public String[] formatDate(String date, String[] automatedValues){
+        String[] dateArray = date.split("/");
+        String day = dateArray[0];
+        String month = dateArray[1];
+        String year = dateArray[2];
+        int dayInt;
+        int monthInt;
+        int yearInt;
+
+        dayInt = Integer.parseInt(day);
+        automatedValues[0] = String.valueOf(dayInt);
+
+        if(Character.isDigit(month.charAt(0)) == true){
+            monthInt = Integer.parseInt(month);
+        }else{
+
+           if(month == "jan" || month == "january"){
+               monthInt = 1;
+           }else if(month == "feb" || month == "february") {
+               monthInt = 2;
+           }else if(month == "mar" || month == "march"){
+               monthInt = 3;
+           }else if(month == "apr" || month == "april"){
+               monthInt = 4;
+           }else if(month == "may" || month == "may"){
+               monthInt = 5;
+           }else if(month == "jun" || month == "june"){
+               monthInt = 6;
+           }else if(month == "jul" || month == "july"){
+               monthInt = 7;
+           }else if(month == "aug" || month == "august"){
+               monthInt = 8;
+           }else if(month == "sep" || month == "september"){
+               monthInt = 9;
+           }else if(month == "oct" || month == "october"){
+               monthInt = 10;
+           }else if(month == "nov" || month == "november"){
+               monthInt = 11;
+           }else if(month == "dec" || month == "december"){
+               monthInt = 12;
+           }else{
+               monthInt =1;
+           }
+        }
+        automatedValues[1] = String.valueOf(monthInt);
+
+        if(year.length() == 2){
+            yearInt = Integer.parseInt("20" + year);
+        }else{
+            yearInt = Integer.parseInt(year);
+        }
+
+        automatedValues[2] = String.valueOf(yearInt);
+
+        return automatedValues;
+    }
     public boolean checkIfDateFormat(String currentWord, String dateSymbol){
         //Check for 2-2, 2-4, or 4-2 format exists
         String firstPart = currentWord.substring(0, currentWord.indexOf(dateSymbol));
@@ -479,7 +554,7 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
 
     }
 
-    public void getSumAmount(Set<FirebaseVisionDocumentText.Word> matchedKeywords, List<FirebaseVisionDocumentText.Block> blocks){
+    public String getSumAmount(Set<FirebaseVisionDocumentText.Word> matchedKeywords, List<FirebaseVisionDocumentText.Block> blocks){
 
 
         //After checked all blocks..words
@@ -577,7 +652,8 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
         }
         chosenWord = chosenWord.trim();
 
-        sumAmount = chosenWord;
+//        sumAmount = chosenWord;
+        return chosenWord;
 
     }
 
