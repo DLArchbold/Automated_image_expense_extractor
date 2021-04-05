@@ -101,6 +101,9 @@ public class ManualEntryActivity extends AppCompatActivity {
     //For editing an expense/income
     String[] oneRecordValues;
 
+    //For ImageRecognitionEntryActivtiy confirmation
+    String[] automatedValues;
+
     private LocationManager locationManager;
     private LocationListener locationListener;
     private EditText coordinateField;
@@ -124,6 +127,8 @@ public class ManualEntryActivity extends AppCompatActivity {
         //If updating, get updated record
         if (getIntent().hasExtra("oneRecordValues") == true) {
             oneRecordValues = getIntent().getExtras().getStringArray("oneRecordValues");
+        }else if(getIntent().hasExtra("automatedValues") == true){
+            automatedValues = getIntent().getExtras().getStringArray("automatedValues");
         }
 
 
@@ -185,7 +190,7 @@ public class ManualEntryActivity extends AppCompatActivity {
         setupSeeLocationButton();
 
         //Set additional fields if updating a record
-        if (oneRecordValues != null) {
+        if (oneRecordValues != null || automatedValues != null) {
             setupAmount();
             setupDescription();
             setupDeleteButton();
@@ -532,16 +537,19 @@ public class ManualEntryActivity extends AppCompatActivity {
 
 
     private void setupDeleteButton() {
-        Button deleteButton = findViewById(R.id.button_delete);
-        deleteButton.setVisibility(View.VISIBLE);
+        if(oneRecordValues!=null){
+            Button deleteButton = findViewById(R.id.button_delete);
+            deleteButton.setVisibility(View.VISIBLE);
 
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deleteRecord();
-                finish();
-            }
-        });
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    deleteRecord();
+                    finish();
+                }
+            });
+        }
+
 
     }
 
@@ -554,15 +562,23 @@ public class ManualEntryActivity extends AppCompatActivity {
 
 
     private void setupAmount() {
-        if (oneRecordValues[0].equals("Expense")) {
-            amount.setText(oneRecordValues[2].substring(oneRecordValues[2].indexOf("-") + 1));
-        } else {
-            amount.setText(oneRecordValues[2]);
+        if(oneRecordValues != null){
+            if (oneRecordValues[0].equals("Expense")) {
+                amount.setText(oneRecordValues[2].substring(oneRecordValues[2].indexOf("-") + 1));
+            } else {
+                amount.setText(oneRecordValues[2]);
+            }
+        }else if(automatedValues!=null){
+            amount.setText(automatedValues[3]);
         }
+
     }
 
     private void setupDescription() {
-        description.setText(oneRecordValues[3]);
+        if(oneRecordValues!=null){
+            description.setText(oneRecordValues[3]);
+        }
+
     }
 
     private void updateExpense() {
@@ -681,12 +697,20 @@ public class ManualEntryActivity extends AppCompatActivity {
     private void setupDatePicker() {
 
 
-        if (oneRecordValues != null) {
-            String dateToSet = oneRecordValues[1];
-            date.setText(dateToSet.replace("-", "/"));
-            yr = Integer.parseInt(oneRecordValues[1].substring(oneRecordValues[1].lastIndexOf("-") + 1));
-            mh = Integer.parseInt(oneRecordValues[1].substring(oneRecordValues[1].indexOf("-") + 1, oneRecordValues[1].lastIndexOf("-")));
-            dy = Integer.parseInt(oneRecordValues[1].substring(0, oneRecordValues[1].indexOf("-")));
+        if (oneRecordValues != null || automatedValues != null) {
+            if(automatedValues == null){
+                String dateToSet = oneRecordValues[1];
+                date.setText(dateToSet.replace("-", "/"));
+                yr = Integer.parseInt(oneRecordValues[1].substring(oneRecordValues[1].lastIndexOf("-") + 1));
+                mh = Integer.parseInt(oneRecordValues[1].substring(oneRecordValues[1].indexOf("-") + 1, oneRecordValues[1].lastIndexOf("-")));
+                dy = Integer.parseInt(oneRecordValues[1].substring(0, oneRecordValues[1].indexOf("-")));
+            }else if(oneRecordValues == null){
+                date.setText(automatedValues[0] + "/" + automatedValues[1] + "/" + automatedValues[2]);
+                yr = Integer.parseInt(automatedValues[2]);
+                mh = Integer.parseInt(automatedValues[1]);
+                dy = Integer.parseInt(automatedValues[0]);
+            }
+
             date.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
