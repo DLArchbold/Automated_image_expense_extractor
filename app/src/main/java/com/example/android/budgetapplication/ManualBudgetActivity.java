@@ -65,6 +65,7 @@ public class ManualBudgetActivity extends AppCompatActivity {
             TextView limit = (TextView) findViewById(R.id.spend_limit);
             limit.setText(df.format(Double.parseDouble(oneBudgetValues[3])));
             setupDeleteButton();
+            getSupportActionBar().setTitle("Edit/Update a budget");
 
         }
 

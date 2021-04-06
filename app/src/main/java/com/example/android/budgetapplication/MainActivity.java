@@ -12,11 +12,20 @@ import com.example.android.budgetapplication.adapters.SliderAdapter;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.view.MenuItem;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -26,10 +35,15 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,16 +52,27 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
+import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private ViewPager mSlideViewPager;
     private TextView mDotLayout;
     private SliderAdapter sliderAdapter;
+    GoogleSignInClient mGoogleSignInClient;
+    SignInButton signInButton;
+    Button signOutButton;
+    View navHeader;
+    View navMenu;
+    TextView email_field;
+    TextView name_field;
+    TextView iconTxt;
+    ImageView iconImg;
+    private static final int RC_SIGN_IN = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -71,6 +96,7 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -78,15 +104,155 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        //Display all database records
+                //Display all database records
         displayDatabaseInfo();
 
+
+        //Deal with Google sign in and header
+        navHeader = navigationView.getHeaderView(0);
+        signInButton = (SignInButton) navHeader.findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_STANDARD);
+
+        signOutButton = (Button) navHeader.findViewById(R.id.sign_out_button);
+
+
+        email_field = navHeader.findViewById(R.id.email);
+        name_field = navHeader.findViewById(R.id.name);
+        iconTxt = navHeader.findViewById(R.id.title);
+        iconImg = navHeader.findViewById(R.id.imageView);
+
+        View.OnClickListener signInClickListener  = new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                signIn();
+            }
+        };
+        signInButton.setOnClickListener(signInClickListener);
+        View.OnClickListener signOutClickListener = new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                signOut();
+            }
+        };
+        signOutButton.setOnClickListener(signOutClickListener);
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+
+//        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+
+        mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+
+//        updateSignIn(account);
+    }
+
+    private void updateSignIn(GoogleSignInAccount account){
+        if(account== null){
+            //Display sign in button
+            //Hide email/name/sign out button
+            signOutButton.setVisibility(View.GONE);
+            signInButton.setVisibility(View.VISIBLE);
+            email_field.setVisibility(View.GONE);
+            name_field.setVisibility(View.GONE);
+            iconImg.setVisibility(View.GONE);
+            iconTxt.setVisibility(View.GONE);
+        }else{
+            //Hide sign in button
+            //Display email/name/sign out button
+            signOutButton.setVisibility(View.VISIBLE);
+           signInButton.setVisibility(View.GONE);
+            email_field.setVisibility(View.VISIBLE);
+            name_field.setVisibility(View.VISIBLE);
+            email_field.setText(account.getEmail());
+            String displayName =account.getDisplayName();
+            name_field.setText(displayName);
+            if(account.getPhotoUrl() != null){
+                iconImg.setVisibility(View.VISIBLE);
+                iconTxt.setVisibility(View.GONE);
+                String photoUri = account.getPhotoUrl().toString();
+                Picasso.with(getApplicationContext()).load(photoUri).resize(72, 0).transform(new CircleTransform()).into(iconImg);
+            }else {
+                iconTxt.setVisibility(View.VISIBLE);
+                iconImg.setVisibility(View.GONE);
+                System.out.println(displayName);
+                String firstAlphabetFirstName = String.valueOf(displayName.toUpperCase().charAt(0));
+                //displayName.toUpperCase().charAt(0);
+                iconTxt.setText(firstAlphabetFirstName);
+               // icon.setBackground(R.mipmap.icon_color);
+
+            }
+        }
+    }
+
+    private void signOut() {
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        signOutButton.setVisibility(View.GONE);
+                        signInButton.setVisibility(View.VISIBLE);
+                        email_field.setVisibility(View.GONE);
+                        name_field.setVisibility(View.GONE);
+                        iconImg.setVisibility(View.GONE);
+                        iconTxt.setVisibility(View.GONE);
+                        revokeAccess();
+                    }
+                });
+    }
+    private void revokeAccess() {
+        mGoogleSignInClient.revokeAccess()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // ...
+                    }
+                });
+    }
+    private void signIn() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        //Request code number for sign in when onActivityResult() returned
+
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            // The Task returned from this call is always completed, no need to attach
+            // a listener.
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+        }
+
+    }
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+
+            // Signed in successfully, show authenticated UI.
+            updateSignIn(account);
+
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.w("MainActivity", "signInResult:failed code=" + e.getStatusCode());
+            updateSignIn(null);
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         displayDatabaseInfo();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        updateSignIn(account);
     }
 
 
@@ -226,13 +392,13 @@ public class MainActivity extends AppCompatActivity
 */
 
         //Unique dates and their would be idx on 2d array that contains income/expense Adapters
-        HashMap<String, Integer> datePosition =  mapDatesToIdx();
+        HashMap<String, Integer> datePosition = mapDatesToIdx();
         HashMap<Integer, String> idxDate = mapIdxToDates(datePosition);
 
         //Obtain expense and income adapters corresponding to their day
         OneLevelExpenseAdapter[][] expenseIncomePageAdapters = new OneLevelExpenseAdapter[2][mapDatesToIdx().keySet().size()];
-        expenseIncomePageAdapters= getIncomeOrExpenseAdapter("Expense", datePosition, expenseIncomePageAdapters);
-        expenseIncomePageAdapters = getIncomeOrExpenseAdapter("Income", datePosition,expenseIncomePageAdapters );
+        expenseIncomePageAdapters = getIncomeOrExpenseAdapter("Expense", datePosition, expenseIncomePageAdapters);
+        expenseIncomePageAdapters = getIncomeOrExpenseAdapter("Income", datePosition, expenseIncomePageAdapters);
 
         //Split expense and income adapters
         OneLevelExpenseAdapter[] expensePageAdapters = expenseIncomePageAdapters[0];
@@ -250,15 +416,15 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private HashMap<Integer, String> mapIdxToDates(HashMap<String, Integer> mapDatesToIdx){
+    private HashMap<Integer, String> mapIdxToDates(HashMap<String, Integer> mapDatesToIdx) {
         HashMap<Integer, String> idxToDates = new HashMap<>();
-        for(String date:mapDatesToIdx.keySet()){
+        for (String date : mapDatesToIdx.keySet()) {
             idxToDates.put(mapDatesToIdx.get(date), date);
         }
         return idxToDates;
     }
 
-    private HashMap<String, Integer> mapDatesToIdx (){
+    private HashMap<String, Integer> mapDatesToIdx() {
 
         String[] projection = {
                 ExpenseEntry._ID,
@@ -290,7 +456,7 @@ public class MainActivity extends AppCompatActivity
             String curCursorDate = cursor.getString(dateColIdx);
 
             if (!datePos.containsKey(curCursorDate)) {
-                datePos.put(curCursorDate, pos++ );
+                datePos.put(curCursorDate, pos++);
             }
 
         }
@@ -299,7 +465,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private OneLevelExpenseAdapter[][] getIncomeOrExpenseAdapter(String expenseOrIncome, HashMap<String, Integer> datePosition, OneLevelExpenseAdapter[][] expenseIncomePageAdapters){
+    private OneLevelExpenseAdapter[][] getIncomeOrExpenseAdapter(String expenseOrIncome, HashMap<String, Integer> datePosition, OneLevelExpenseAdapter[][] expenseIncomePageAdapters) {
 
         List<String> listDataHeader = new ArrayList<>();
         HashMap<String, List<String>> listDataChild = new HashMap<>();
@@ -366,7 +532,6 @@ public class MainActivity extends AppCompatActivity
 //        list.setAdapter(adapter);
 
 
-
 //        //2 level ExpandableListView to populate, use ParentLevelAdapter and SecondLevelAddapter
 //        Map<String, Map<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection);
 //
@@ -380,23 +545,21 @@ public class MainActivity extends AppCompatActivity
 //        }
 
 
-
         /////////////////////////Adding ViewPager//////////////////////////////////////
 
 
-
         //Array of OneLevelExpenseAdapters to store categories->expenses for 1 date and page for each array element
-        OneLevelExpenseAdapter [] pageAdapters = new OneLevelExpenseAdapter[uniqueDates.size()];
+        OneLevelExpenseAdapter[] pageAdapters = new OneLevelExpenseAdapter[uniqueDates.size()];
         //dateCatExpense contains Dates->Categories->Cursors
         Object[] dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection, expenseOrIncome);
-        LinkedHashMap<String, LinkedHashMap<String, Cursor>> catExpense =  (LinkedHashMap<String, LinkedHashMap<String, Cursor>>) dateCatExpense[0];
-        LinkedHashMap<String, LinkedHashMap<String, Cursor>> catSum =  (LinkedHashMap<String, LinkedHashMap<String, Cursor>>) dateCatExpense[1];
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> catExpense = (LinkedHashMap<String, LinkedHashMap<String, Cursor>>) dateCatExpense[0];
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> catSum = (LinkedHashMap<String, LinkedHashMap<String, Cursor>>) dateCatExpense[1];
         //LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = getDateCategoryData(uniqueDates, expenseIncomeCategory, cursor, projection, expenseOrIncome);
         //Create an array of OneLevelExpenseAdapter objects for all dateCatExpense entries for each page's ExpandableListView
         Iterator<LinkedHashMap.Entry<String, LinkedHashMap<String, Cursor>>> iteratorCatExpense = catExpense.entrySet().iterator();
         Iterator<LinkedHashMap.Entry<String, LinkedHashMap<String, Cursor>>> iteratorCatSum = catSum.entrySet().iterator();
-        int ctr =0;
-        while(iteratorCatExpense.hasNext() && iteratorCatSum.hasNext()){
+        int ctr = 0;
+        while (iteratorCatExpense.hasNext() && iteratorCatSum.hasNext()) {
             //Move to next date->category->expenses map entry then get the categories->expenses
             String curDate = iteratorCatExpense.next().getKey();
             LinkedHashMap<String, Cursor> catsExpenses = catExpense.get(curDate);
@@ -405,16 +568,16 @@ public class MainActivity extends AppCompatActivity
 
             //Create 1 adapter for 1 page which rep. 1 day's expense/income
             List<String> validCategories = new ArrayList<String>();
-            String valCatArray [] = Arrays.copyOf(validCatArr, validCatArr.length, String[].class);
+            String valCatArray[] = Arrays.copyOf(validCatArr, validCatArr.length, String[].class);
             List<String> validCatList = Arrays.asList(valCatArray);
             pageAdapters[ctr] = new OneLevelExpenseAdapter(this, validCatList, catsExpenses, catsSum, expenseOrIncome);
 
             //Expense pageAdapters fill column 0, while income page adapters fill column 1. Each row represents a day.
             //which may have either or both expenses/income
             int curDatePosition = datePosition.get(curDate);
-            if(expenseOrIncome.equals("Expense")){
+            if (expenseOrIncome.equals("Expense")) {
                 expenseIncomePageAdapters[0][curDatePosition] = pageAdapters[ctr];
-            }else{ //if it's income
+            } else { //if it's income
                 expenseIncomePageAdapters[1][curDatePosition] = pageAdapters[ctr];
             }
 
@@ -423,8 +586,8 @@ public class MainActivity extends AppCompatActivity
         return expenseIncomePageAdapters;
     }
 
-    private double [] dateBalances (HashMap<String, Integer> datePosition){
-        String[] projection =  { ExpenseEntry.COLUMN_DATE , ExpenseEntry.COLUMN_AMOUNT  };
+    private double[] dateBalances(HashMap<String, Integer> datePosition) {
+        String[] projection = {ExpenseEntry.COLUMN_DATE, ExpenseEntry.COLUMN_AMOUNT};
         Cursor balancesCursor;
         balancesCursor = getContentResolver().query(
                 ExpenseEntry.CONTENT_URI,
@@ -435,18 +598,18 @@ public class MainActivity extends AppCompatActivity
 
         );
 
-        double[] balanceForEachDate =new double[datePosition.size()];
+        double[] balanceForEachDate = new double[datePosition.size()];
 
 
         balancesCursor.moveToFirst();
         int dateColIdx = balancesCursor.getColumnIndex(ExpenseEntry.COLUMN_DATE);
         int amtColIdx = balancesCursor.getColumnIndex(ExpenseEntry.COLUMN_AMOUNT);
-        for( int i = 0; i<balancesCursor.getCount(); i++ ){
+        for (int i = 0; i < balancesCursor.getCount(); i++) {
 
             String date = balancesCursor.getString(dateColIdx);
             double amt = balancesCursor.getDouble(amtColIdx);
             System.out.println("date print: " + date);
-            if(date.equals("20-2-2021")){
+            if (date.equals("20-2-2021")) {
                 System.out.println("amt when 20-2-2021 " + amt);
             }
             balanceForEachDate[datePosition.get(date)] += amt;
@@ -499,10 +662,10 @@ public class MainActivity extends AppCompatActivity
 //                ExpenseEntry.COLUMN_DATE
 //        };
 
-        String[] sumProjection =  { "sum(" + ExpenseEntry.COLUMN_AMOUNT  + ")"};
+        String[] sumProjection = {"sum(" + ExpenseEntry.COLUMN_AMOUNT + ")"};
         Cursor sumCursor;
-        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = new  LinkedHashMap <String, LinkedHashMap<String, Cursor>>();
-        LinkedHashMap<String, LinkedHashMap<String, Cursor>>  dateCatOptionSum = new LinkedHashMap<String, LinkedHashMap<String, Cursor>>();
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatExpense = new LinkedHashMap<String, LinkedHashMap<String, Cursor>>();
+        LinkedHashMap<String, LinkedHashMap<String, Cursor>> dateCatOptionSum = new LinkedHashMap<String, LinkedHashMap<String, Cursor>>();
         //For all unique dates
         for (String uniqueDate : uniqueDates) {
 
@@ -538,7 +701,7 @@ public class MainActivity extends AppCompatActivity
 //                + expenseOrIncome);
 
 
-                if (cursor.getCount() > 0 && sumCursor.getCount()>0) {
+                if (cursor.getCount() > 0 && sumCursor.getCount() > 0) {
                     Log.e("MainActvity", String.valueOf("num of rows" + cursor.getCount()) + " " + uniqueDate + " " + category);
                     //For 1 date
                     //1st loop
@@ -570,10 +733,10 @@ public class MainActivity extends AppCompatActivity
             //         ->Transport (expenses/income) ->sum)
             dateCatOptionSum.put(uniqueDate, oneDateCategoriesOptionSum);
         }
-        Object[] expenseAndSumMaps= new  Object[2];
-        expenseAndSumMaps[0] = dateCatExpense ;
+        Object[] expenseAndSumMaps = new Object[2];
+        expenseAndSumMaps[0] = dateCatExpense;
         expenseAndSumMaps[1] = dateCatOptionSum;
-        return  expenseAndSumMaps;
+        return expenseAndSumMaps;
     }
 
 
@@ -624,27 +787,23 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_home) {
-            // Handle the camera action
-        } //else if (id == R.id.nav_gallery) {
+        if (id == R.id.menu_action_manual) {
 
-//        } else if (id == R.id.nav_slideshow) {
-//
-//        } else if (id == R.id.nav_tools) {
-//
-//        }
-        else if (id == R.id.supposed_spending_rate) {
+            Intent ManualEntryIntent = new Intent(MainActivity.this, ManualEntryActivity.class);
+            startActivity(ManualEntryIntent);
+        } else if (id == R.id.menu_action_image_recognition) {
             //Open activity with expandable list view of set budgets, allow addition and selection of budget with form
             //In form set start/end date, category, spend and save amount, then sum from available dates
             //Then if still have days then figure out difference needed to overcome deficit if any.
             //
 
-            Intent budgetListActivityIntent = new Intent(this, BudgetListActivity.class);
-            startActivity(budgetListActivityIntent);
+            Intent ImageRecognitionEntryIntent = new Intent(MainActivity.this, ImageRecognitionEntryActivity.class);
+            startActivity(ImageRecognitionEntryIntent);
 
 
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.menu_supposed_spending_rate){
+            Intent budgetListIntent = new Intent(MainActivity.this, BudgetListActivity.class);
+            startActivity(budgetListIntent);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

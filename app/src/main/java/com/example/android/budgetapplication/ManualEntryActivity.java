@@ -127,6 +127,8 @@ public class ManualEntryActivity extends AppCompatActivity {
         //If updating, get updated record
         if (getIntent().hasExtra("oneRecordValues") == true) {
             oneRecordValues = getIntent().getExtras().getStringArray("oneRecordValues");
+            //getActionBar().setTitle("Edit/Update an expense");
+           getSupportActionBar().setTitle("Edit/Update an expense");
         }else if(getIntent().hasExtra("automatedValues") == true){
             automatedValues = getIntent().getExtras().getStringArray("automatedValues");
         }
