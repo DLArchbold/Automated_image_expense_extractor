@@ -42,6 +42,7 @@ import android.widget.TextView;
 
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -141,12 +142,13 @@ public class MainActivity extends AppCompatActivity
                 .build();
 
 
-//        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+
 
         mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
 
+        File dbPath = getDatabasePath("expenses.db");
+        System.out.println("dbPath: " + dbPath.toString());
 
-//        updateSignIn(account);
     }
 
     private void updateSignIn(GoogleSignInAccount account){
