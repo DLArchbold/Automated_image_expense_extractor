@@ -1,7 +1,10 @@
 
 package com.example.android.budgetapplication;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,9 +25,18 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.drive.CreateFileActivityOptions;
+import com.google.android.gms.drive.MetadataChangeSet;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 
@@ -36,24 +48,42 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.view.Menu;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
 import com.squareup.picasso.Picasso;
+import com.google.android.gms.drive.DriveClient;
+import com.google.android.gms.drive.DriveContents;
+import com.google.android.gms.drive.DriveResourceClient;
+import com.example.android.budgetapplication.DriveServiceHelper;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.json.gson.GsonFactory;
+
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -70,7 +100,12 @@ public class MainActivity extends AppCompatActivity
     TextView iconTxt;
     ImageView iconImg;
     private static final int RC_SIGN_IN = 1;
-
+    private static final int REQUEST_CODE_CREATOR = 2;
+    private static final int REQUEST_CODE_OPEN_DOCUMENT = 3;
+    private DriveClient mDriveClient;
+    private DriveResourceClient mDriveResourceClient;
+    Uri dbUri;
+    private DriveServiceHelper mDriveServiceHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -105,7 +140,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-                //Display all database records
+        //Display all database records
         displayDatabaseInfo();
 
 
@@ -122,37 +157,41 @@ public class MainActivity extends AppCompatActivity
         iconTxt = navHeader.findViewById(R.id.title);
         iconImg = navHeader.findViewById(R.id.imageView);
 
-        View.OnClickListener signInClickListener  = new View.OnClickListener(){
+        View.OnClickListener signInClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 signIn();
             }
         };
         signInButton.setOnClickListener(signInClickListener);
-        View.OnClickListener signOutClickListener = new View.OnClickListener(){
+        View.OnClickListener signOutClickListener = new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 signOut();
             }
         };
         signOutButton.setOnClickListener(signOutClickListener);
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-
-
-
-        mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestEmail()
+//                .build();
+//
+//
+//
+//
+//        mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
 
         File dbPath = getDatabasePath("expenses.db");
-        System.out.println("dbPath: " + dbPath.toString());
-
+         dbUri = Uri.fromFile(dbPath);
+        System.out.println("dbPath: " + dbPath);
+        System.out.println("file class: " + File.class);
+        String mimeType = getMimeType(dbUri);
+        Log.e("MainActivity", "mimeType: " + mimeType);
+        signIn();
     }
 
-    private void updateSignIn(GoogleSignInAccount account){
-        if(account== null){
+    private void updateSignIn(GoogleSignInAccount account) {
+        if (account == null) {
             //Display sign in button
             //Hide email/name/sign out button
             signOutButton.setVisibility(View.GONE);
@@ -161,32 +200,159 @@ public class MainActivity extends AppCompatActivity
             name_field.setVisibility(View.GONE);
             iconImg.setVisibility(View.GONE);
             iconTxt.setVisibility(View.GONE);
-        }else{
+        } else {
             //Hide sign in button
             //Display email/name/sign out button
             signOutButton.setVisibility(View.VISIBLE);
-           signInButton.setVisibility(View.GONE);
+            signInButton.setVisibility(View.GONE);
             email_field.setVisibility(View.VISIBLE);
             name_field.setVisibility(View.VISIBLE);
             email_field.setText(account.getEmail());
-            String displayName =account.getDisplayName();
+            String displayName = account.getDisplayName();
             name_field.setText(displayName);
-            if(account.getPhotoUrl() != null){
+            if (account.getPhotoUrl() != null) {
                 iconImg.setVisibility(View.VISIBLE);
                 iconTxt.setVisibility(View.GONE);
                 String photoUri = account.getPhotoUrl().toString();
                 Picasso.with(getApplicationContext()).load(photoUri).resize(72, 0).transform(new CircleTransform()).into(iconImg);
-            }else {
+            } else {
                 iconTxt.setVisibility(View.VISIBLE);
                 iconImg.setVisibility(View.GONE);
                 System.out.println(displayName);
                 String firstAlphabetFirstName = String.valueOf(displayName.toUpperCase().charAt(0));
                 //displayName.toUpperCase().charAt(0);
                 iconTxt.setText(firstAlphabetFirstName);
-               // icon.setBackground(R.mipmap.icon_color);
+                // icon.setBackground(R.mipmap.icon_color);
 
             }
+
+//            mDriveClient = Drive.getDriveClient(this, GoogleSignIn.getLastSignedInAccount(this));
+//            // Build a drive resource client.
+//            mDriveResourceClient =
+//                    Drive.getDriveResourceClient(this, GoogleSignIn.getLastSignedInAccount(this));
+
+            // Excel Sheet path from SD card
+            final String filePath = "/data/user/0/com.example.android.budgetapplication/databases/expenses.db";
+            //saveFileToDrive(filePath);
         }
+    }
+//
+//    /**
+//     * Create a new file and save it to Drive.
+//     */
+//    private void saveFileToDrive(final String filePath) {
+//        // Start by creating a new contents, and setting a callback.
+//        Log.i("MainActivity", "Creating new contents. wj ");
+//
+//        mDriveResourceClient
+//                .createContents()
+//                .continueWithTask(
+//                        new Continuation<DriveContents, Task<Void>>() {
+//                            @Override
+//                            public Task<Void> then(@NonNull Task<DriveContents> task) throws Exception {
+//                                return createFileIntentSender(task.getResult(), new File(filePath));
+//                            }
+//                        })
+//                .addOnFailureListener(
+//                        new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//                                Log.w("MainActivity", "Failed to create new contents. wj", e);
+//                            }
+//                        });
+//    }
+//
+//    /**
+//     * Creates an {@link IntentSender} to start a dialog activity with configured {@link
+//     * CreateFileActivityOptions} for user to create a new photo in Drive.
+//     */
+//    private Task<Void> createFileIntentSender(DriveContents driveContents, File file) throws Exception {
+//        Log.i("MainActivity", "New contents created. wj");
+//
+//        OutputStream outputStream = driveContents.getOutputStream();
+//        InputStream in = new FileInputStream(file);
+//        try {
+//            try {
+//                // Transfer bytes from in to out
+//                byte[] buf = new byte[1024];
+//                int len;
+//                while ((len = in.read(buf)) > 0) {
+//                    outputStream.write(buf, 0, len);
+//                }
+//            } finally {
+//                outputStream.close();
+//            }
+//        } finally {
+//            in.close();
+//        }
+//
+//
+//        // Create the initial metadata - MIME type and title.
+//        // Note that the user will be able to change the title later.
+//        MetadataChangeSet metadataChangeSet =
+//                new MetadataChangeSet.Builder()
+//                        .setMimeType(getMimeType( dbUri))
+//                        .setTitle("expenses.db")
+//                        .build();
+//        // Set up options to configure and display the create file activity.
+//        CreateFileActivityOptions createFileActivityOptions =
+//                new CreateFileActivityOptions.Builder()
+//                        .setInitialMetadata(metadataChangeSet)
+//                        .setInitialDriveContents(driveContents)
+//                        .build();
+//
+//        return mDriveClient
+//                .newCreateFileActivityIntentSender(createFileActivityOptions)
+//                .continueWith(
+//                        new Continuation<IntentSender, Void>() {
+//                            @Override
+//                            public Void then(@NonNull Task<IntentSender> task) throws Exception {
+//                                startIntentSenderForResult(task.getResult(), REQUEST_CODE_CREATOR, null, 0, 0, 0);
+//                                return null;
+//                            }
+//                        });
+//    }
+
+
+    /**
+     * Opens a file from its {@code uri} returned from the Storage Access Framework file picker
+     * initiated by pressing R.id.menu_open_gdrive navigation menu item.
+     */
+    private void openFileFromFilePicker(Uri uri) {
+        if (mDriveServiceHelper != null) {
+            Log.d("MainActivity", "Opening wj " + uri.getPath());
+
+            mDriveServiceHelper.openFileUsingStorageAccessFramework(getContentResolver(), uri)
+                    .addOnSuccessListener(nameAndContent -> {
+                        String name = nameAndContent.first;
+//                        String content = nameAndContent.second;
+//
+//                        mFileTitleEditText.setText(name);
+//                        mDocContentEditText.setText(content);
+
+                        // Files opened through SAF cannot be modified.
+                        //setReadOnlyMode();
+                    })
+                    .addOnFailureListener(exception ->
+                            Log.e("MainActivity", "Unable to open file from picker. wj", exception));
+        }
+    }
+
+
+    public String getMimeType(Uri uri) {
+        Log.i("MainActivity", "In getMimeType. wj");
+        String mimeType = null;
+        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+            ContentResolver cr = getApplicationContext().getContentResolver();
+            mimeType = cr.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                    .toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    fileExtension.toLowerCase());
+        }
+
+        return mimeType;
     }
 
     private void signOut() {
@@ -204,6 +370,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
     }
+
     private void revokeAccess() {
         mGoogleSignInClient.revokeAccess()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
@@ -213,24 +380,50 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
     }
+
     private void signIn() {
+        mGoogleSignInClient = buildGoogleSignInClient();
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         //Request code number for sign in when onActivityResult() returned
 
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    /**
+     * Build a Google SignIn client.
+     */
+    private GoogleSignInClient buildGoogleSignInClient() {
+        GoogleSignInOptions gso =
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestEmail()
+                        .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
+                        .build();
+        return GoogleSignIn.getClient(getApplicationContext(), gso);
+    }
 
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-        }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+
+
+            switch(requestCode){
+                // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+                case RC_SIGN_IN:
+                    // The Task returned from this call is always completed, no need to attach
+                    // a listener.
+                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(resultData);
+
+                    handleSignInResult(task);
+                    break;
+                case REQUEST_CODE_OPEN_DOCUMENT:
+                    if (resultCode == Activity.RESULT_OK && resultData != null) {
+                        Uri uri = resultData.getData();
+                        if (uri != null) {
+                            openFileFromFilePicker(uri);
+                        }
+                    }
+                    break;
+            }
 
     }
 
@@ -238,6 +431,23 @@ public class MainActivity extends AppCompatActivity
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
+            completedTask.addOnSuccessListener(new OnSuccessListener<GoogleSignInAccount>() {
+                @Override
+                public void onSuccess(GoogleSignInAccount googleAccount) {
+                    Log.d("MainActivity", "wj Signed in as " + googleAccount.getEmail());
+                    GoogleAccountCredential credential =
+                            GoogleAccountCredential.usingOAuth2(
+                                   getApplicationContext(), Collections.singleton(DriveScopes.DRIVE_FILE));
+
+                    credential.setSelectedAccount(googleAccount.getAccount());
+                   Drive googleDriveService = new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(),credential)
+                            .setApplicationName("Drive API Migration")
+                            .build();
+                    // The DriveServiceHelper encapsulates all REST API and SAF functionality.
+                    // Its instantiation is required before handling any onClick actions.
+                    mDriveServiceHelper = new DriveServiceHelper(googleDriveService);
+                }
+            }).addOnFailureListener(exception -> Log.e("MainActivity", "wj Unable to sign in.", exception));
             // Signed in successfully, show authenticated UI.
             updateSignIn(account);
 
@@ -254,6 +464,7 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
         displayDatabaseInfo();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        //signOut();
         updateSignIn(account);
     }
 
@@ -803,9 +1014,18 @@ public class MainActivity extends AppCompatActivity
             startActivity(ImageRecognitionEntryIntent);
 
 
-        } else if (id == R.id.menu_supposed_spending_rate){
+        } else if (id == R.id.menu_supposed_spending_rate) {
             Intent budgetListIntent = new Intent(MainActivity.this, BudgetListActivity.class);
             startActivity(budgetListIntent);
+        } else if (id == R.id.menu_open_gdrive) {
+            if (mDriveServiceHelper != null) {
+                Log.d("MainActivity", "Opening file picker. wj");
+
+                Intent pickerIntent = mDriveServiceHelper.createFilePickerIntent();
+
+                // The result of the SAF Intent is handled in onActivityResult.
+                startActivityForResult(pickerIntent, REQUEST_CODE_OPEN_DOCUMENT);
+            }
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

@@ -18,6 +18,9 @@
             <item
                 android:id="@+id/menu_supposed_spending_rate"
                 android:title="Supposed spending rate" />
+            <item
+                android:id ="@+id/menu_open_gdrive"
+                android:title = "Open Google Drive"/>
 
 
         </menu>
