@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity
     private DriveResourceClient mDriveResourceClient;
     Uri dbUri;
     private DriveServiceHelper mDriveServiceHelper;
+    Drive googleDriveService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -172,21 +173,7 @@ public class MainActivity extends AppCompatActivity
         };
         signOutButton.setOnClickListener(signOutClickListener);
 
-//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                .requestEmail()
-//                .build();
-//
-//
-//
-//
-//        mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
 
-        File dbPath = getDatabasePath("expenses.db");
-         dbUri = Uri.fromFile(dbPath);
-        System.out.println("dbPath: " + dbPath);
-        System.out.println("file class: " + File.class);
-        String mimeType = getMimeType(dbUri);
-        Log.e("MainActivity", "mimeType: " + mimeType);
         signIn();
     }
 
@@ -234,6 +221,7 @@ public class MainActivity extends AppCompatActivity
             // Excel Sheet path from SD card
             final String filePath = "/data/user/0/com.example.android.budgetapplication/databases/expenses.db";
             //saveFileToDrive(filePath);
+
         }
     }
 //
@@ -338,22 +326,48 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void createFile() {
+        if (mDriveServiceHelper != null) {
+            Log.d("MainActivity", "Creating a file.");
 
-    public String getMimeType(Uri uri) {
-        Log.i("MainActivity", "In getMimeType. wj");
-        String mimeType = null;
-        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
-            ContentResolver cr = getApplicationContext().getContentResolver();
-            mimeType = cr.getType(uri);
-        } else {
-            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
-                    .toString());
-            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                    fileExtension.toLowerCase());
+//            mDriveServiceHelper.createFile()
+//                    .addOnSuccessListener(fileId -> readFile(fileId))
+//                    .addOnFailureListener(exception ->
+//                            Log.e("MainActivity", "Couldn't create file.", exception));
+
+
+            deleteBackupTaskParams taskParams = new deleteBackupTaskParams(googleDriveService, mDriveServiceHelper.ms);
+            new DriveServiceHelper.deleteBackupsTask().execute(taskParams);
+
+            mDriveServiceHelper.createFile()
+                    .addOnSuccessListener(fileId -> readFile(fileId))
+                    .addOnFailureListener(exception ->
+                            Log.e("MainActivity", "Couldn't create file.", exception));
+
+
+
         }
-
-        return mimeType;
     }
+
+    private void readFile(String fileId) {
+        if (mDriveServiceHelper != null) {
+            Log.d("MainActivity", "wj Reading file " + fileId);
+
+            mDriveServiceHelper.readFile(fileId)
+                    .addOnSuccessListener(nameAndContent -> {
+                        String name = nameAndContent.first;
+                        String content = nameAndContent.second;
+
+//                        mFileTitleEditText.setText(name);
+//                        mDocContentEditText.setText(content);
+//
+//                        setReadWriteMode(fileId);
+                    })
+                    .addOnFailureListener(exception ->
+                            Log.e("MainActivity", "WJ Couldn't read file.", exception));
+        }
+    }
+
 
     private void signOut() {
         mGoogleSignInClient.signOut()
@@ -440,12 +454,13 @@ public class MainActivity extends AppCompatActivity
                                    getApplicationContext(), Collections.singleton(DriveScopes.DRIVE_FILE));
 
                     credential.setSelectedAccount(googleAccount.getAccount());
-                   Drive googleDriveService = new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(),credential)
+                   googleDriveService = new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(),credential)
                             .setApplicationName("Drive API Migration")
                             .build();
                     // The DriveServiceHelper encapsulates all REST API and SAF functionality.
                     // Its instantiation is required before handling any onClick actions.
-                    mDriveServiceHelper = new DriveServiceHelper(googleDriveService);
+                    mDriveServiceHelper = new DriveServiceHelper(googleDriveService, getApplicationContext());
+                    createFile();
                 }
             }).addOnFailureListener(exception -> Log.e("MainActivity", "wj Unable to sign in.", exception));
             // Signed in successfully, show authenticated UI.

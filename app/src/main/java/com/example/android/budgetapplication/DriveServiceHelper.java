@@ -1,24 +1,36 @@
 package com.example.android.budgetapplication;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.OpenableColumns;
+import android.util.Log;
 //import android.support.v4.util.Pair;
+import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 //import android.util.Pair;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -29,22 +41,46 @@ import java.util.concurrent.Executors;
 public class DriveServiceHelper {
     private final Executor mExecutor = Executors.newSingleThreadExecutor();
     private final Drive mDriveService;
+    public Context mContext;
+    String ms;
 
-    public DriveServiceHelper(Drive driveService) {
+    public DriveServiceHelper(Drive driveService, Context context) {
         mDriveService = driveService;
+        mContext = context;
+
+        Date date = new Date();
+        ms = "_" + String.valueOf(date.getTime());
     }
+
+
 
     /**
      * Creates a text file in the user's My Drive folder and returns its file ID.
      */
     public Task<String> createFile() {
         return Tasks.call(mExecutor, () -> {
+            java.io.File dbPath = mContext.getDatabasePath("expenses.db");
+            Uri dbUri = Uri.fromFile(dbPath);
+            Log.w("DriveServiceHelper", "dbUri 1 wj: " + dbUri);
+//            fileUri = Uri.fromFile(new java.io.File(Environment.getDataDirectory().getPath()
+//                    + "/data/com.example.myapp/databases/mydb.db"));
+//            dbUri = Uri.fromFile(new java.io.File(Environment.getDataDirectory().getPath()
+//                    + dbUri));
+//            Log.w("DriveServiceHelper", "dbUri 2 wj: " + dbUri);
+
+            //java.io.File fileContent = new java.io.File(dbUri.getPath());
+            FileContent mediaContent = new FileContent("application/vnd.sqlite3", dbPath);
+            File body = new com.google.api.services.drive.model.File();
+
+            String fileName = dbPath.getName().substring(0, dbPath.getName().indexOf('.')) + ms + dbPath.getName().substring(dbPath.getName().indexOf('.'));
             File metadata = new File()
                     .setParents(Collections.singletonList("root"))
-                    .setMimeType("text/plain")
-                    .setName("Untitled file");
+                    .setMimeType("application/vnd.sqlite3")
+                    .setName(fileName);
 
-            File googleFile = mDriveService.files().create(metadata).execute();
+            File googleFile;
+            Log.d("DriveServiceHelper", "wj " + fileName);
+            googleFile = mDriveService.files().create(metadata, mediaContent).execute();
             if (googleFile == null) {
                 throw new IOException("Null result when requesting file creation.");
             }
@@ -52,6 +88,39 @@ public class DriveServiceHelper {
             return googleFile.getId();
         });
     }
+
+
+
+    public static class deleteBackupsTask extends AsyncTask<deleteBackupTaskParams, Void, Void> {
+        @Override
+        protected Void doInBackground(deleteBackupTaskParams... deleteBackupTaskParam) {
+
+            try {
+              FileList fileList =   deleteBackupTaskParam[0].driveService.files().list().setSpaces("drive").execute();
+                for (File file : fileList.getFiles()) {
+                    //builder.append(file.getName()).append("\n");
+                    Log.d("doInBackground", " wj fileNames: " + file.getName());
+                    if (!file.getName().equals("expenses" + deleteBackupTaskParam[0].ms + ".db")) {
+
+                        try {
+                            Log.d("doInBackground", "wj delete success! ");
+                            deleteBackupTaskParam[0].driveService.files().delete(file.getId()).execute();
+                        } catch (IOException e) {
+                            Log.e("doInBackground", "wj delete failed " + e);
+                        }
+                    }
+
+                }
+
+            } catch (IOException e) {
+
+            }
+            return null;
+
+        }
+
+    }
+
 
     /**
      * Opens the file identified by {@code fileId} and returns a {@link Pair} of its name and
@@ -93,6 +162,7 @@ public class DriveServiceHelper {
 
             // Update the metadata and contents.
             mDriveService.files().update(fileId, metadata, contentStream).execute();
+
             return null;
         });
     }
@@ -109,7 +179,35 @@ public class DriveServiceHelper {
         return Tasks.call(mExecutor, () ->
                 mDriveService.files().list().setSpaces("drive").execute());
     }
+    public Task<Boolean> query() {
+        return Tasks.call(mExecutor, () -> {
+            Log.d("DriveServiceHelper", " wj Querying for files.");
 
+            this.queryFiles()
+                    .addOnSuccessListener(fileList -> {
+                        StringBuilder builder = new StringBuilder();
+                        //fileList only contains files from Google Drive created by this app
+                        for (File file : fileList.getFiles()) {
+                            //builder.append(file.getName()).append("\n");
+                            Log.d("DriveServiceHelper", " wj fileNames: " + file.getName());
+                            if (!file.getName().equals("expenses" + ms + ".db")) {
+
+                                try {
+                                    Log.d("DriveServiceHelper", "wj delete success! ");
+                                    mDriveService.files().delete(file.getId()).execute();
+                                } catch (IOException e) {
+                                    Log.e("DriveServiceHelper", "wj delete failed " + e);
+                                }
+                            }
+
+                        }
+                    })
+                    .addOnFailureListener(exception -> Log.e("MainActivity", "Unable to query files.", exception));
+            return true;
+        });
+
+
+    }
     /**
      * Returns an {@link Intent} for opening the Storage Access Framework file picker.
      */
@@ -154,4 +252,8 @@ public class DriveServiceHelper {
             return Pair.create(name, content);
         });
     }
+
+
+
+
 }

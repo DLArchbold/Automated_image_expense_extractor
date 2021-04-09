@@ -309,7 +309,10 @@ public class ManualEntryActivity extends AppCompatActivity {
         // Use the {@link ExpenseEntry#CONTENT_URI} to indicate that we want to insert
         // into the pets database table.
         // Receive the new content URI that will allow us to access this record's data in the future.
-        newUri = getContentResolver().insert(ExpenseEntry.CONTENT_URI, values);
+
+            newUri = getContentResolver().insert(ExpenseEntry.CONTENT_URI, values);
+
+
 
         // Show a toast message depending on whether or not the insertion was successful
         if (newUri == null) {
