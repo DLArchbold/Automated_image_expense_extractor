@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.example.android.budgetapplication.adapters.ExpandableListAdapter;
@@ -56,15 +57,16 @@ import android.widget.Toast;
 
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -75,6 +77,7 @@ import java.util.Set;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
 import com.squareup.picasso.Picasso;
 import com.google.android.gms.drive.DriveClient;
 import com.google.android.gms.drive.DriveContents;
@@ -175,6 +178,14 @@ public class MainActivity extends AppCompatActivity
 
 
         signIn();
+
+//        java.io.File directory = new java.io.File("/data/user/0/com.example.android.budgetapplication/databases");
+//        java.io.File[] files = directory.listFiles();
+//        for (java.io.File oneFile : files){
+//            System.out.println("wj file name: " + oneFile.getName());
+//        }
+
+
     }
 
     private void updateSignIn(GoogleSignInAccount account) {
@@ -335,18 +346,39 @@ public class MainActivity extends AppCompatActivity
 //                    .addOnFailureListener(exception ->
 //                            Log.e("MainActivity", "Couldn't create file.", exception));
 
-
-            deleteBackupTaskParams taskParams = new deleteBackupTaskParams(googleDriveService, mDriveServiceHelper.ms);
+            //Delete old backup first
+            Date date = new Date();
+            mDriveServiceHelper.ms = "_" + String.valueOf(date.getTime());
+            deleteBackupTaskParams taskParams = new deleteBackupTaskParams(googleDriveService, mDriveServiceHelper.ms, getApplicationContext());
             new DriveServiceHelper.deleteBackupsTask().execute(taskParams);
+            Toast.makeText(getApplicationContext(), "Creating backup.....", Toast.LENGTH_LONG).show();
 
+            //Create new backup
             mDriveServiceHelper.createFile()
-                    .addOnSuccessListener(fileId -> readFile(fileId))
+                    .addOnSuccessListener(new OnSuccessListener<String>() {
+                        @Override
+                        public void onSuccess(String s) {
+                            Toast.makeText(getApplicationContext(), "Backup created!", Toast.LENGTH_LONG).show();
+                        }
+                    })
                     .addOnFailureListener(exception ->
                             Log.e("MainActivity", "Couldn't create file.", exception));
 
 
 
+
         }
+    }
+
+    private void restoreDB(){
+        if(mDriveServiceHelper!=null){
+            Date date = new Date();
+            mDriveServiceHelper.ms = "_" + String.valueOf(date.getTime());
+            restoreBackupTaskParams taskParams = new restoreBackupTaskParams(googleDriveService, mDriveServiceHelper.ms, getApplicationContext());
+            mDriveServiceHelper.restoreTask(taskParams);
+            Toast.makeText(getApplicationContext(), "Restoring.....", Toast.LENGTH_LONG).show();
+        }
+
     }
 
     private void readFile(String fileId) {
@@ -390,7 +422,9 @@ public class MainActivity extends AppCompatActivity
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        // ...
+                       googleDriveService = null;
+                        mDriveServiceHelper = null;
+
                     }
                 });
     }
@@ -460,7 +494,7 @@ public class MainActivity extends AppCompatActivity
                     // The DriveServiceHelper encapsulates all REST API and SAF functionality.
                     // Its instantiation is required before handling any onClick actions.
                     mDriveServiceHelper = new DriveServiceHelper(googleDriveService, getApplicationContext());
-                    createFile();
+
                 }
             }).addOnFailureListener(exception -> Log.e("MainActivity", "wj Unable to sign in.", exception));
             // Signed in successfully, show authenticated UI.
@@ -1040,6 +1074,18 @@ public class MainActivity extends AppCompatActivity
 
                 // The result of the SAF Intent is handled in onActivityResult.
                 startActivityForResult(pickerIntent, REQUEST_CODE_OPEN_DOCUMENT);
+            }
+        }else if (id == R.id.menu_backup){
+            if(mDriveServiceHelper!=null){
+                Log.d("MainActivity", "Backing up. wj");
+                createFile();
+            }else{
+                Toast.makeText(getApplicationContext(), "Please login first!", Toast.LENGTH_LONG).show();
+            }
+        } else if (id == R.id.menu_backup) {
+            if (mDriveServiceHelper != null) {
+                Log.d("MainActivity", "Restoring wj");
+                restoreDB();
             }
         }
 

@@ -21,7 +21,12 @@
             <item
                 android:id ="@+id/menu_open_gdrive"
                 android:title = "Open Google Drive"/>
-
+            <item
+                android:id ="@+id/menu_backup"
+                android:title = "Backup to  Google Drive"/>
+            <item
+                android:id ="@+id/menu_restore"
+                android:title = "Restore from  Google Drive"/>
 
         </menu>
     </item>

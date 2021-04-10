@@ -4,16 +4,14 @@ import android.content.Context;
 
 import com.google.api.services.drive.Drive;
 
-public class deleteBackupTaskParams {
+public class restoreBackupTaskParams {
     Drive driveService;
     String ms;
     Context mContext;
 
-    deleteBackupTaskParams(Drive driveService, String ms, Context context) {
+    restoreBackupTaskParams(Drive driveService, String ms, Context context) {
         this.driveService = driveService;
         this.ms = ms;
         this.mContext = context;
     }
-
-
 }

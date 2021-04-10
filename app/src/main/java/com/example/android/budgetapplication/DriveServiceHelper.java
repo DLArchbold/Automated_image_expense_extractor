@@ -4,11 +4,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.util.Log;
+import android.widget.Toast;
 //import android.support.v4.util.Pair;
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
@@ -24,9 +26,12 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
@@ -59,6 +64,7 @@ public class DriveServiceHelper {
      */
     public Task<String> createFile() {
         return Tasks.call(mExecutor, () -> {
+            //Toast.makeText(mContext, "Creating backup.....", Toast.LENGTH_LONG).show();
             java.io.File dbPath = mContext.getDatabasePath("expenses.db");
             Uri dbUri = Uri.fromFile(dbPath);
             Log.w("DriveServiceHelper", "dbUri 1 wj: " + dbUri);
@@ -85,6 +91,8 @@ public class DriveServiceHelper {
                 throw new IOException("Null result when requesting file creation.");
             }
 
+
+
             return googleFile.getId();
         });
     }
@@ -95,13 +103,29 @@ public class DriveServiceHelper {
         @Override
         protected Void doInBackground(deleteBackupTaskParams... deleteBackupTaskParam) {
 
+            //File directory = new File("/data/user/0/com.example.android.budgetapplication/databases");
+
             try {
               FileList fileList =   deleteBackupTaskParam[0].driveService.files().list().setSpaces("drive").execute();
-                for (File file : fileList.getFiles()) {
-                    //builder.append(file.getName()).append("\n");
-                    Log.d("doInBackground", " wj fileNames: " + file.getName());
-                    if (!file.getName().equals("expenses" + deleteBackupTaskParam[0].ms + ".db")) {
 
+
+                for (File file : fileList.getFiles()) {
+
+//                    String fileId = file.getId();
+//                    java.io.File dbfile = new java.io.File("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db");
+//                    OutputStream outputStream = new FileOutputStream("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db");
+//                    deleteBackupTaskParam[0].driveService.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+//                    SQLiteDatabase myDataBase = SQLiteDatabase.openDatabase("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db", null, SQLiteDatabase.OPEN_READWRITE);
+//                    Cursor c = myDataBase.rawQuery("SELECT * from expenses", null);
+//                   System.out.println("c.getCount(): " +  c.getCount());
+//                    outputStream.close();
+
+
+                    //builder.append(file.getName()).append("\n");
+                    Log.d("doInBackground", " wj com.google.api file name: " + file.getName());
+                    if (!file.getName().equals("expenses" + deleteBackupTaskParam[0].ms + ".db")) {
+                        System.out.println("wj downloaded com.google.api.File location: " + deleteBackupTaskParam[0].mContext.getDatabasePath("random") + " related com.google.api.File name "
+                         + file.getName());
                         try {
                             Log.d("doInBackground", "wj delete success! ");
                             deleteBackupTaskParam[0].driveService.files().delete(file.getId()).execute();
@@ -112,6 +136,12 @@ public class DriveServiceHelper {
 
                 }
 
+//                java.io.File directory = new java.io.File("/data/user/0/com.example.android.budgetapplication/databases/");
+//                java.io.File[] files = directory.listFiles();
+//                for (java.io.File oneFile : files){
+//                    System.out.println("wj java.io.File name in local directory: " + oneFile.getName());
+//                }
+
             } catch (IOException e) {
 
             }
@@ -120,6 +150,52 @@ public class DriveServiceHelper {
         }
 
     }
+
+
+    public Task<String> restoreTask(restoreBackupTaskParams taskParams) {
+        return Tasks.call(mExecutor, () -> {
+            //Toast.makeText(mContext, "Creating backup.....", Toast.LENGTH_LONG).show();
+            FileList fileList =   taskParams.driveService.files().list().setSpaces("drive").execute();
+            String fileId = null;
+
+            for (File file : fileList.getFiles()) {
+
+                fileId = file.getId();
+
+
+
+            }
+
+            //Download from drive to local app database directory
+            if(!fileId.isEmpty()){
+                java.io.File dbfile = new java.io.File("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db");
+                OutputStream outputStream = new FileOutputStream("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db");
+                taskParams.driveService.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+                outputStream.close();
+            }
+
+            //Check if backup downloaded successfully
+            java.io.File directory = new java.io.File("/data/user/0/com.example.android.budgetapplication/databases/");
+            java.io.File[] files = directory.listFiles();
+            for (java.io.File oneFile : files){
+                System.out.println("wj java.io.File name in local directory: " + oneFile.getName());
+            }
+
+            SQLiteDatabase myDataBase = SQLiteDatabase.openDatabase("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db", null, SQLiteDatabase.OPEN_READWRITE);
+            Cursor c = myDataBase.rawQuery("SELECT * from expenses", null);
+            System.out.println("c.getCount(): " +  c.getCount());
+
+
+
+
+
+
+
+            return googleFile.getId();
+        });
+    }
+
+
 
 
     /**
