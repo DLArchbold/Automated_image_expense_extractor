@@ -87,7 +87,6 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.json.gson.GsonFactory;
 
 
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private ViewPager mSlideViewPager;
@@ -110,6 +109,7 @@ public class MainActivity extends AppCompatActivity
     Uri dbUri;
     private DriveServiceHelper mDriveServiceHelper;
     Drive googleDriveService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -365,17 +365,24 @@ public class MainActivity extends AppCompatActivity
                             Log.e("MainActivity", "Couldn't create file.", exception));
 
 
-
-
         }
     }
 
-    private void restoreDB(){
-        if(mDriveServiceHelper!=null){
+    private void restoreDB() {
+        if (mDriveServiceHelper != null) {
             Date date = new Date();
             mDriveServiceHelper.ms = "_" + String.valueOf(date.getTime());
             restoreBackupTaskParams taskParams = new restoreBackupTaskParams(googleDriveService, mDriveServiceHelper.ms, getApplicationContext());
-            mDriveServiceHelper.restoreTask(taskParams);
+            OnSuccessListener<String> restoreTaskOnSuccessListener = new OnSuccessListener<String>(){
+                @Override
+                public void onSuccess(String s) {
+                    displayDatabaseInfo();
+                    Toast.makeText(getApplicationContext(), "Restore done!", Toast.LENGTH_LONG).show();
+                }
+            };
+            mDriveServiceHelper.restoreTask(taskParams).addOnSuccessListener(restoreTaskOnSuccessListener);
+            //new DriveServiceHelper.restoreAsyncTask().execute(taskParams);
+
             Toast.makeText(getApplicationContext(), "Restoring.....", Toast.LENGTH_LONG).show();
         }
 
@@ -422,7 +429,7 @@ public class MainActivity extends AppCompatActivity
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                       googleDriveService = null;
+                        googleDriveService = null;
                         mDriveServiceHelper = null;
 
                     }
@@ -454,24 +461,24 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, resultData);
 
 
-            switch(requestCode){
-                // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-                case RC_SIGN_IN:
-                    // The Task returned from this call is always completed, no need to attach
-                    // a listener.
-                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(resultData);
+        switch (requestCode) {
+            // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+            case RC_SIGN_IN:
+                // The Task returned from this call is always completed, no need to attach
+                // a listener.
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(resultData);
 
-                    handleSignInResult(task);
-                    break;
-                case REQUEST_CODE_OPEN_DOCUMENT:
-                    if (resultCode == Activity.RESULT_OK && resultData != null) {
-                        Uri uri = resultData.getData();
-                        if (uri != null) {
-                            openFileFromFilePicker(uri);
-                        }
+                handleSignInResult(task);
+                break;
+            case REQUEST_CODE_OPEN_DOCUMENT:
+                if (resultCode == Activity.RESULT_OK && resultData != null) {
+                    Uri uri = resultData.getData();
+                    if (uri != null) {
+                        openFileFromFilePicker(uri);
                     }
-                    break;
-            }
+                }
+                break;
+        }
 
     }
 
@@ -485,10 +492,10 @@ public class MainActivity extends AppCompatActivity
                     Log.d("MainActivity", "wj Signed in as " + googleAccount.getEmail());
                     GoogleAccountCredential credential =
                             GoogleAccountCredential.usingOAuth2(
-                                   getApplicationContext(), Collections.singleton(DriveScopes.DRIVE_FILE));
+                                    getApplicationContext(), Collections.singleton(DriveScopes.DRIVE_FILE));
 
                     credential.setSelectedAccount(googleAccount.getAccount());
-                   googleDriveService = new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(),credential)
+                    googleDriveService = new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(), credential)
                             .setApplicationName("Drive API Migration")
                             .build();
                     // The DriveServiceHelper encapsulates all REST API and SAF functionality.
@@ -1075,14 +1082,14 @@ public class MainActivity extends AppCompatActivity
                 // The result of the SAF Intent is handled in onActivityResult.
                 startActivityForResult(pickerIntent, REQUEST_CODE_OPEN_DOCUMENT);
             }
-        }else if (id == R.id.menu_backup){
-            if(mDriveServiceHelper!=null){
+        } else if (id == R.id.menu_backup) {
+            if (mDriveServiceHelper != null) {
                 Log.d("MainActivity", "Backing up. wj");
                 createFile();
-            }else{
+            } else {
                 Toast.makeText(getApplicationContext(), "Please login first!", Toast.LENGTH_LONG).show();
             }
-        } else if (id == R.id.menu_backup) {
+        } else if (id == R.id.menu_restore) {
             if (mDriveServiceHelper != null) {
                 Log.d("MainActivity", "Restoring wj");
                 restoreDB();

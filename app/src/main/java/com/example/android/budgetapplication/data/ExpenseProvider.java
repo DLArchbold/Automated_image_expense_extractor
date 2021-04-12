@@ -27,6 +27,7 @@ public class ExpenseProvider extends ContentProvider {
     private static final int DATE_CATEGORY_OPTION = 5;
     private static final int BUDGET_LIMIT = 6;
     private static final int BUDGET_DAYS_WITH_SPENDING = 7;
+    private static final int EXPENSE_ALL_FIELDS = 8;
     //private static final int INCOME_ONLY = 5;
     /**
      * Tag for the log messages
@@ -50,6 +51,8 @@ public class ExpenseProvider extends ContentProvider {
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/#" + "/#" + "/#" + "/#" + "/#" + "/#" + "/*", BUDGET_LIMIT);
         sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/#" + "/#" + "/#" + "/#" + "/#" + "/#" + "/*" + "/*", BUDGET_DAYS_WITH_SPENDING);
         //sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*" , INCOME_ONLY);
+        //sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/#"+ "/*" + "/#" + "/#"+ "/#"+ "/#"+ "/*"+ "/*"+ "/*"+ "/*", EXPENSE_ALL_FIELDS);
+        sUriMatcher.addURI(ExpenseContract.ExpenseEntry.CONTENT_AUTHORITY, ExpenseContract.ExpenseEntry.PATH_EXPENSES + "/*"+ "/*" + "/*"+ "/*"+ "/*"+ "/*"+ "/*"+ "/*"+ "/*"+ "/*", EXPENSE_ALL_FIELDS);
     }
 
 
@@ -184,6 +187,32 @@ public class ExpenseProvider extends ContentProvider {
                         ")";
                 cursor = database.rawQuery(sql_budget_days_with_spending, null);
                 break;
+            case EXPENSE_ALL_FIELDS:
+                selection = ExpenseContract.ExpenseEntry._ID + "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_OPTION + "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_DAY + "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_MONTH + "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_YEAR + "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_DESCRIPTION+ "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_DATE + "=? " + "AND " +
+                        ExpenseContract.ExpenseEntry.COLUMN_COORDINATES + "=?";
+
+
+
+                //get expenses/id/option/day/month/year.....
+                strUri = strUri.substring(strUri.indexOf("expenses"), strUri.length());
+                //get id/option/day/month/year.....
+                strUri = strUri.substring(strUri.indexOf("/") + 1);
+                // {date, category, option}
+                selectionArgs = strUri.split("/");
+                // This will perform a query on the expenses table where the {date, expense/income category and
+                // option} equals the selectionArgs to return a Cursor containing rows of the table.
+                cursor = database.query(ExpenseContract.ExpenseEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+
+                break;
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
@@ -241,7 +270,7 @@ public class ExpenseProvider extends ContentProvider {
             return null;
         }
 
-        // TODO: Insert a new pet into the pets database table with the given ContentValues
+        // TODO: Insert a new expense into the pets database table with the given ContentValues
         // Get writeable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
