@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 //import android.util.Pair;
+import com.example.android.budgetapplication.data.BudgetContract;
 import com.example.android.budgetapplication.data.ExpenseContract;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -44,6 +45,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry;
+import com.example.android.budgetapplication.data.BudgetContract.BudgetEntry;
 
 
 /**
@@ -344,7 +346,7 @@ public class DriveServiceHelper {
     }
 
 
-    public Task<String> restoreTask(restoreBackupTaskParams taskParams) {
+    public Task<String> restoreExpensesTask(restoreBackupTaskParams taskParams) {
         return Tasks.call(mExecutor, () -> {
             try {
                 //File directory = new File("/data/user/0/com.example.android.budgetapplication/databases");
@@ -527,6 +529,196 @@ public class DriveServiceHelper {
             return "";
         });
     }
+
+    public Task<String> restoreBudgetTask(restoreBackupTaskParams taskParams) {
+        return Tasks.call(mExecutor, () -> {
+            try {
+                //File directory = new File("/data/user/0/com.example.android.budgetapplication/databases");
+                FileList fileList = taskParams.driveService.files().list().setSpaces("drive").execute();
+                String fileId = null;
+
+                for (File file : fileList.getFiles()) {
+
+                    fileId = file.getId();
+
+                }
+
+                //Download from drive to local app database directory
+                if (!fileId.isEmpty()) {
+                    java.io.File dbfile = new java.io.File("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db");
+                    OutputStream outputStream = new FileOutputStream("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db");
+                    taskParams.driveService.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+                    outputStream.close();
+                }
+
+                //Check if backup downloaded successfully
+                java.io.File directory = new java.io.File("/data/user/0/com.example.android.budgetapplication/databases/");
+                java.io.File[] files = directory.listFiles();
+                for (java.io.File oneFile : files) {
+                    System.out.println("wj java.io.File name in local directory: " + oneFile.getName());
+                }
+
+                SQLiteDatabase expenseBackupDatabase = SQLiteDatabase.openDatabase("/data/user/0/com.example.android.budgetapplication/databases/expenses_backup.db", null, SQLiteDatabase.OPEN_READWRITE);
+                Cursor budgetBackupTableCursor = expenseBackupDatabase.rawQuery("SELECT * from budget", null);
+                System.out.println("c.getCount(): " + budgetBackupTableCursor.getCount());
+                Log.d("DriveServiceHelper", "test: " + String.valueOf(budgetBackupTableCursor.getCount()));
+
+
+                //Columns to retrieve from original expense.db during query
+                String[] budgetTableCursorProjection = {
+                        BudgetEntry._ID,
+                        BudgetEntry.COLUMN_START_DAY,
+                        BudgetEntry.COLUMN_START_MONTH,
+                        BudgetEntry.COLUMN_START_YEAR,
+                        BudgetEntry.COLUMN_START_DATE,
+                        BudgetEntry.COLUMN_END_DAY,
+                        BudgetEntry.COLUMN_END_MONTH,
+                        BudgetEntry.COLUMN_END_YEAR,
+                        BudgetEntry.COLUMN_END_DATE,
+                        BudgetEntry.COLUMN_SPEND_LIMIT,
+                        BudgetEntry.COLUMN_CATEGORY
+                };
+
+
+                //Retrieve from expense_backup.db to cross-check with expense.db
+                int idColIdx = budgetBackupTableCursor.getColumnIndex(BudgetEntry._ID);
+                int startDayColIdx = budgetBackupTableCursor.getColumnIndex(BudgetEntry.COLUMN_START_DAY);
+                int startMonthIdx = budgetBackupTableCursor.getColumnIndex(BudgetEntry.COLUMN_START_MONTH);
+                int startYearColIdx = budgetBackupTableCursor.getColumnIndex( BudgetEntry.COLUMN_START_YEAR);
+                int startDateColIdx = budgetBackupTableCursor.getColumnIndex(BudgetEntry.COLUMN_START_DATE);
+                int endDayColIdx = budgetBackupTableCursor.getColumnIndex(BudgetEntry.COLUMN_END_DAY);
+                int endMonthColIdx = budgetBackupTableCursor.getColumnIndex(BudgetEntry.COLUMN_END_MONTH);
+                int endYearColIdx = budgetBackupTableCursor.getColumnIndex( BudgetEntry.COLUMN_END_YEAR);
+                int endDateColIdx = budgetBackupTableCursor.getColumnIndex(BudgetEntry.COLUMN_END_DATE);
+                int spendLimitColIdx = budgetBackupTableCursor.getColumnIndex(BudgetEntry.COLUMN_SPEND_LIMIT);
+                int categoryColIdx =budgetBackupTableCursor.getColumnIndex(BudgetEntry.COLUMN_CATEGORY);
+
+                budgetBackupTableCursor.moveToFirst();
+
+                for(int i = 0; i<budgetBackupTableCursor.getCount(); i++) {
+                    int cId = budgetBackupTableCursor.getInt(idColIdx);
+                    int cStartDay = budgetBackupTableCursor.getInt(startDayColIdx);
+                    int cStartMonth = budgetBackupTableCursor.getInt(startMonthIdx);
+                    int cStartYear = budgetBackupTableCursor.getInt(startYearColIdx);
+                    String cStartDate = budgetBackupTableCursor.getString(startDateColIdx);
+                    int cEndDay = budgetBackupTableCursor.getInt(endDayColIdx);
+                    int cEndMonth = budgetBackupTableCursor.getInt(endMonthColIdx);
+                    int cEndYear = budgetBackupTableCursor.getInt(endYearColIdx);
+                    String cEndDate = budgetBackupTableCursor.getString(endDateColIdx);
+                    double cSpendLimit = budgetBackupTableCursor.getDouble(spendLimitColIdx);
+                    int cCategory = budgetBackupTableCursor.getInt(categoryColIdx);
+
+
+//                    boolean coordinatesSet=true;
+//                    if(cCoordinates.equals("")){
+//                        coordinatesSet = false;
+//                        cCoordinates = "-";
+//                    }
+
+                    //Define selection arguments
+                    String path = "/" + String.valueOf(cId) + "/" + String.valueOf(cStartDay) + "/" + String.valueOf(cStartMonth) + "/" + String.valueOf(cStartYear) + "/"
+                            + cStartDate + "/" + String.valueOf(cEndDay) + "/" + String.valueOf(cEndMonth) + "/" + String.valueOf(cEndYear) + "/"
+                            + cEndDate +"/" + String.valueOf(cSpendLimit) + "/" + String.valueOf(cCategory);
+
+                    //get id/option/day/month/year.....
+                    String strUri = path.substring(path.indexOf("/") + 1);
+                    // {date, category, option}
+                    String[] selectionArgs = strUri.split("/");
+
+//                    if(coordinatesSet == false){
+//                        selectionArgs[9] = "";
+//                    }
+
+                    //Define selection
+                    String selection =  BudgetEntry._ID + "=? " + "AND " +
+                            BudgetEntry.COLUMN_START_DAY + "=? " + "AND " +
+                            BudgetEntry.COLUMN_START_MONTH + "=? " + "AND " +
+                            BudgetEntry.COLUMN_START_YEAR + "=? " + "AND " +
+                            BudgetEntry.COLUMN_START_DATE + "=? " + "AND " +
+                            BudgetEntry.COLUMN_END_DAY + "=? " + "AND " +
+                            BudgetEntry.COLUMN_END_MONTH+ "=? " + "AND " +
+                            BudgetEntry.COLUMN_END_YEAR + "=? " + "AND " +
+                            BudgetEntry.COLUMN_END_DATE + "=? " + "AND " +
+                            BudgetEntry.COLUMN_SPEND_LIMIT + "=? " + "AND " +
+                            BudgetEntry.COLUMN_CATEGORY + "=?";
+
+
+
+                    // This will perform a query on the expenses table where the {date, expense/income category and
+                    // option} equals the selectionArgs to return a Cursor containing rows of the table.
+                    SQLiteDatabase expensesDatabase = SQLiteDatabase.openDatabase("/data/user/0/com.example.android.budgetapplication/databases/expenses.db", null, SQLiteDatabase.OPEN_READWRITE);
+                    Cursor budgetTableCursor = expensesDatabase.query(BudgetEntry.TABLE_NAME, budgetTableCursorProjection, selection, selectionArgs,
+                            null, null, null);
+
+
+
+//                    Cursor expenseTableCursor = restoreBackupTaskParam[0].mContext.getContentResolver().query(
+//                            Uri.withAppendedPath(ExpenseEntry.CONTENT_URI, path),
+//                            expenseTableCursorProjection,
+//                            null,
+//                            null
+//
+//                    );
+                    System.out.println("budgetTableCursor count: " + budgetTableCursor.getCount());
+                    System.out.println("path: " + path);
+
+                    //Row from backup does not exist in local db
+                    if(budgetTableCursor.getCount() == 0){
+                        ContentValues values = new ContentValues();
+                        values.put(BudgetEntry._ID, cId);
+                        values.put(BudgetEntry.COLUMN_START_DAY, cStartDay);
+                        values.put( BudgetEntry.COLUMN_START_MONTH, cStartMonth);
+                        values.put(BudgetEntry.COLUMN_START_YEAR, cStartYear);
+                        values.put(BudgetEntry.COLUMN_START_DATE, cStartDate);
+                        values.put( BudgetEntry.COLUMN_END_DAY , cEndDay);
+                        values.put(BudgetEntry.COLUMN_END_MONTH, cEndMonth);
+                        values.put(BudgetEntry.COLUMN_END_YEAR, cEndYear);
+                        values.put(BudgetEntry.COLUMN_END_DATE, cEndDate);
+                        values.put(BudgetEntry.COLUMN_SPEND_LIMIT, cSpendLimit);
+                        values.put(BudgetEntry.COLUMN_CATEGORY, cCategory);
+
+
+
+
+                        long insertedId =  expensesDatabase.insert(BudgetEntry.TABLE_NAME, null, values);
+                        System.out.println("insertedId: " + insertedId);
+                    }
+
+
+
+                    /*Debug code
+                    expenseTableCursor.moveToFirst();
+
+                    for(int j = 0; j<expenseTableCursor.getCount(); j++){
+                        String row = + expenseTableCursor.getInt(expenseTableCursor.getColumnIndex(ExpenseEntry._ID))
+                                + expenseTableCursor.getString(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_OPTION))
+                                + expenseTableCursor.getInt(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_DAY))
+                                + expenseTableCursor.getInt(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_MONTH))
+                                + expenseTableCursor.getInt(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_YEAR))
+                                + expenseTableCursor.getDouble(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_AMOUNT))
+                                + expenseTableCursor.getString(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_DESCRIPTION))
+                                + expenseTableCursor.getString(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_CATEGORY))
+                                + expenseTableCursor.getString(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_DATE))
+                                + expenseTableCursor.getString(expenseTableCursor.getColumnIndex(ExpenseEntry.COLUMN_COORDINATES));
+                        System.out.println("restore: "+ row);
+                        expenseTableCursor.moveToNext();
+                    }
+                    */
+
+
+
+                    budgetBackupTableCursor.moveToNext();
+                }
+                expenseBackupDatabase.close();
+
+            } catch (IOException e) {
+
+            }
+
+            return "";
+        });
+    }
+
 
 
     /**

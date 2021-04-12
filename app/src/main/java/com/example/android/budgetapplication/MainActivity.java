@@ -370,22 +370,60 @@ public class MainActivity extends AppCompatActivity
 
     private void restoreDB() {
         if (mDriveServiceHelper != null) {
-            Date date = new Date();
-            mDriveServiceHelper.ms = "_" + String.valueOf(date.getTime());
-            restoreBackupTaskParams taskParams = new restoreBackupTaskParams(googleDriveService, mDriveServiceHelper.ms, getApplicationContext());
-            OnSuccessListener<String> restoreTaskOnSuccessListener = new OnSuccessListener<String>(){
-                @Override
-                public void onSuccess(String s) {
-                    displayDatabaseInfo();
-                    Toast.makeText(getApplicationContext(), "Restore done!", Toast.LENGTH_LONG).show();
-                }
-            };
-            mDriveServiceHelper.restoreTask(taskParams).addOnSuccessListener(restoreTaskOnSuccessListener);
-            //new DriveServiceHelper.restoreAsyncTask().execute(taskParams);
-
-            Toast.makeText(getApplicationContext(), "Restoring.....", Toast.LENGTH_LONG).show();
+            restoreExpenseTable(mDriveServiceHelper);
+            restoreBudgetTable(mDriveServiceHelper);
         }
 
+    }
+
+    public void restoreExpenseTable(DriveServiceHelper mDriveServiceHelper){
+        Date date = new Date();
+        mDriveServiceHelper.ms = "_" + String.valueOf(date.getTime());
+        restoreBackupTaskParams taskParams = new restoreBackupTaskParams(googleDriveService, mDriveServiceHelper.ms, getApplicationContext());
+        OnSuccessListener<String> restoreTaskOnSuccessListener = new OnSuccessListener<String>(){
+            @Override
+            public void onSuccess(String s) {
+                displayDatabaseInfo();
+                Toast.makeText(getApplicationContext(), "Expense data restore done!", Toast.LENGTH_LONG).show();
+            }
+        };
+
+        OnFailureListener restoreTaskOnFailureListener = new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getApplicationContext(), "No expense backup data exists!",  Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Failed to restore expense data!", Toast.LENGTH_LONG).show();
+            }
+        };
+        mDriveServiceHelper.restoreExpensesTask(taskParams).addOnSuccessListener(restoreTaskOnSuccessListener).addOnFailureListener(restoreTaskOnFailureListener);
+        //new DriveServiceHelper.restoreAsyncTask().execute(taskParams);
+
+        Toast.makeText(getApplicationContext(), "Restoring.....", Toast.LENGTH_LONG).show();
+    }
+
+    public void restoreBudgetTable(DriveServiceHelper mDriveServiceHelper){
+        Date date = new Date();
+        mDriveServiceHelper.ms = "_" + String.valueOf(date.getTime());
+        restoreBackupTaskParams taskParams = new restoreBackupTaskParams(googleDriveService, mDriveServiceHelper.ms, getApplicationContext());
+        OnSuccessListener<String> restoreTaskOnSuccessListener = new OnSuccessListener<String>(){
+            @Override
+            public void onSuccess(String s) {
+                displayDatabaseInfo();
+                Toast.makeText(getApplicationContext(), "Budget data restore done!", Toast.LENGTH_LONG).show();
+            }
+        };
+
+        OnFailureListener restoreTaskOnFailureListener = new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getApplicationContext(), "No budget backup data exists!",  Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Failed to restore budget data!", Toast.LENGTH_LONG).show();
+            }
+        };
+        mDriveServiceHelper.restoreBudgetTask(taskParams).addOnSuccessListener(restoreTaskOnSuccessListener).addOnFailureListener(restoreTaskOnFailureListener);
+        //new DriveServiceHelper.restoreAsyncTask().execute(taskParams);
+
+        Toast.makeText(getApplicationContext(), "Restoring.....", Toast.LENGTH_LONG).show();
     }
 
     private void readFile(String fileId) {
@@ -1081,6 +1119,8 @@ public class MainActivity extends AppCompatActivity
 
                 // The result of the SAF Intent is handled in onActivityResult.
                 startActivityForResult(pickerIntent, REQUEST_CODE_OPEN_DOCUMENT);
+            }else {
+                Toast.makeText(getApplicationContext(), "Please login first!", Toast.LENGTH_LONG).show();
             }
         } else if (id == R.id.menu_backup) {
             if (mDriveServiceHelper != null) {
@@ -1093,6 +1133,8 @@ public class MainActivity extends AppCompatActivity
             if (mDriveServiceHelper != null) {
                 Log.d("MainActivity", "Restoring wj");
                 restoreDB();
+            }else {
+                Toast.makeText(getApplicationContext(), "Please login first!", Toast.LENGTH_LONG).show();
             }
         }
 
