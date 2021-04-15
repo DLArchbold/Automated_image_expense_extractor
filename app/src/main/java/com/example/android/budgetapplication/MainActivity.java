@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity
         signOutButton.setOnClickListener(signOutClickListener);
 
 
-        signIn();
+        //signIn();
 
 //        java.io.File directory = new java.io.File("/data/user/0/com.example.android.budgetapplication/databases");
 //        java.io.File[] files = directory.listFiles();

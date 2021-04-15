@@ -75,7 +75,7 @@ public class ExpenseDbHelper extends SQLiteOpenHelper {
                 + BudgetEntry.COLUMN_END_YEAR + " INTEGER NOT NULL, "
                 + BudgetEntry.COLUMN_END_DATE + " TEXT NOT NULL, "
                 + BudgetEntry.COLUMN_SPEND_LIMIT + " DOUBLE(5, 2) NOT NULL, "
-                + BudgetEntry.COLUMN_CATEGORY + " INTEGER NOT NULL);";
+                + BudgetEntry.COLUMN_CATEGORY + " TEXT NOT NULL);";
 
         db.execSQL(SQL_CREATE_BUDGET_TABLE);
         db.execSQL(SQL_CREATE_EXPENSE_TABLE);

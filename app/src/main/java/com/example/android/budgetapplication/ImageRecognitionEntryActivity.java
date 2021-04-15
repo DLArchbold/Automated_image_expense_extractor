@@ -273,9 +273,9 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                     Log.e("MainActivity", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + words.get(l).getText());
 
                     String currentWord = words.get(l).getText().toString();
-                    if(currentWord.equals("February")){
+                    if(currentWord.equals("Aug")){
                         int test = 0;
-                        System.out.println("found February");
+                        System.out.println("found Aug");
                     }
                     currentWord = currentWord.toLowerCase();
 
@@ -431,7 +431,10 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
            //System.out.println("this is date: " +date);
        }
 
-
+       if(date == null){
+           Calendar c = Calendar.getInstance();
+           date = String.valueOf(c.get(Calendar.DAY_OF_MONTH)+1) + "/" +  String.valueOf(c.get(Calendar.MONTH)) + "/" + String.valueOf(c.get(Calendar.YEAR));
+       }
 
 
         sumAmount = getSumAmount(matchedKeywords, blocks);
@@ -462,29 +465,29 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
             monthInt = Integer.parseInt(month);
         }else{
 
-           if(month == "jan" || month == "january"){
+           if(month.equals("jan")|| month.equals("january")){
                monthInt = 1;
-           }else if(month == "feb" || month == "february") {
+           }else if(month.equals("feb") || month.equals("february")){
                monthInt = 2;
-           }else if(month == "mar" || month == "march"){
+           }else if(month.equals("mar")|| month.equals("march")){
                monthInt = 3;
-           }else if(month == "apr" || month == "april"){
+           }else if(month.equals("apr")|| month.equals("april")){
                monthInt = 4;
-           }else if(month == "may" || month == "may"){
+           }else if(month.equals("may")|| month.equals("may")){
                monthInt = 5;
-           }else if(month == "jun" || month == "june"){
+           }else if(month.equals("jun")|| month.equals("june")){
                monthInt = 6;
-           }else if(month == "jul" || month == "july"){
+           }else if(month.equals("jul")|| month.equals("july")){
                monthInt = 7;
-           }else if(month == "aug" || month == "august"){
+           }else if(month.equals("aug")|| month.equals("august")){
                monthInt = 8;
-           }else if(month == "sep" || month == "september"){
+           }else if(month.equals("sep")|| month.equals("september")){
                monthInt = 9;
-           }else if(month == "oct" || month == "october"){
+           }else if(month.equals("oct")|| month.equals("october")){
                monthInt = 10;
-           }else if(month == "nov" || month == "november"){
+           }else if(month.equals("nov")|| month.equals("november")){
                monthInt = 11;
-           }else if(month == "dec" || month == "december"){
+           }else if(month.equals("dec")|| month.equals("december")){
                monthInt = 12;
            }else{
                monthInt =1;
@@ -605,7 +608,8 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                         int keyWordTopCoordinates = keyWord.getBoundingBox().top;
                         int keyWordBottomCoordinates = keyWord.getBoundingBox().bottom;
                         double thresholdBottom = keyWord.getBoundingBox().height()*0.25 + keyWordBottomCoordinates;
-                        double thresholdTop = keyWordTopCoordinates -keyWord.getBoundingBox().height()*0.05 ;
+                        double thresholdTop = keyWordTopCoordinates +keyWord.getBoundingBox().height()*0.40 ;
+                        //double thresholdTop = keyWordTopCoordinates -keyWord.getBoundingBox().height()*0.05 ;
 
                         int potentialSumBottom = words.get(l).getBoundingBox().bottom;
                         if(words.get(l).getText().toString().equals("316.0")){
@@ -613,6 +617,7 @@ public class ImageRecognitionEntryActivity extends AppCompatActivity {
                         }
 
                         String sumWord = keyWord.getText();
+                        String curWord = words.get(l).getText().toString();
 
                         if(potentialSumBottom>= thresholdTop && potentialSumBottom <=thresholdBottom ){
                             //Check if text is format 2dp

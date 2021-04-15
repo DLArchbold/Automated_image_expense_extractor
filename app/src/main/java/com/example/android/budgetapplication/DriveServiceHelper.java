@@ -606,7 +606,7 @@ public class DriveServiceHelper {
                     int cEndYear = budgetBackupTableCursor.getInt(endYearColIdx);
                     String cEndDate = budgetBackupTableCursor.getString(endDateColIdx);
                     double cSpendLimit = budgetBackupTableCursor.getDouble(spendLimitColIdx);
-                    int cCategory = budgetBackupTableCursor.getInt(categoryColIdx);
+                    String cCategory = budgetBackupTableCursor.getString(categoryColIdx);
 
 
 //                    boolean coordinatesSet=true;
@@ -618,7 +618,7 @@ public class DriveServiceHelper {
                     //Define selection arguments
                     String path = "/" + String.valueOf(cId) + "/" + String.valueOf(cStartDay) + "/" + String.valueOf(cStartMonth) + "/" + String.valueOf(cStartYear) + "/"
                             + cStartDate + "/" + String.valueOf(cEndDay) + "/" + String.valueOf(cEndMonth) + "/" + String.valueOf(cEndYear) + "/"
-                            + cEndDate +"/" + String.valueOf(cSpendLimit) + "/" + String.valueOf(cCategory);
+                            + cEndDate +"/" + String.valueOf(cSpendLimit) + "/" + cCategory;
 
                     //get id/option/day/month/year.....
                     String strUri = path.substring(path.indexOf("/") + 1);
