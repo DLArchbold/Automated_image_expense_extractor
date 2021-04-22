@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="build/generated/source/buildConfig/debug"/>
+	<classpathentry kind="src" path="src/androidTest/java"/>
+	<classpathentry excluding="com/example/android/budgetapplication/sample/" kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/java/com/example/android/budgetapplication/sample"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="lib" path="build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/debug/R.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/BCLjoy_200.emd.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/BCLlefteyeclosed_200.emd.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/BCLrighteyeclosed_200.emd.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/blazeface.tfl.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/contours.tfl.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/fssd_100_8bit_gray_v1.tflite.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/fssd_100_8bit_v1.tflite.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/fssd_25_8bit_gray_v1.tflite.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/fssd_25_8bit_v1.tflite.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/LMprec_600.emd.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/MFT_fssd_accgray.pb.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/compressed_assets/debug/out/assets/models/MFT_fssd_fastgray.pb.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/merged_java_res/debug/out.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/project_dex_archive/debug/out/08b02a4473f5b868638fb4d8f25c9a1eed88344e103298c142a87dcdcded31df_0.jar"/>
+	<classpathentry kind="lib" path="build/intermediates/project_dex_archive/debug/out/08b02a4473f5b868638fb4d8f25c9a1eed88344e103298c142a87dcdcded31df_1.jar"/>
+	<classpathentry kind="output" path="build/intermediates/javac/debug/classes"/>
+</classpath>

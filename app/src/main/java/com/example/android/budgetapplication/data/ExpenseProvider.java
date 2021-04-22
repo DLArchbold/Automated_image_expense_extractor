@@ -163,8 +163,14 @@ public class ExpenseProvider extends ContentProvider {
                 // This will perform a query on the expenses table where the {date, expense/income category and
                 // option} equals the selectionArgs to return a Cursor containing rows of the table.
                 String sql_budget_limit = "select sum(" + ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + ") from (" +
-                        "select " + ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME + " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + "<=" + selectionArgs[0] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + "<= " + selectionArgs[1] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + "<= " + selectionArgs[2] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" + " INTERSECT " +
-                        "select " + ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME + " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + ">=" + selectionArgs[3] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + ">= " + selectionArgs[4] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + ">= " + selectionArgs[5] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" +
+                        "select " + ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME +
+                        " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + "<=" + selectionArgs[0] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + "<= " + selectionArgs[1] +
+                        " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + "<= " + selectionArgs[2] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] +
+                        " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" + " INTERSECT " +
+                        "select " + ExpenseContract.ExpenseEntry.COLUMN_AMOUNT + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME +
+                        " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + ">=" + selectionArgs[3] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + ">= " + selectionArgs[4] +
+                        " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + ">= " + selectionArgs[5] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] +
+                        " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" +
                         ")";
                 cursor = database.rawQuery(sql_budget_limit, null);
                 break;
@@ -182,8 +188,14 @@ public class ExpenseProvider extends ContentProvider {
                 // This will perform a query on the expenses table where the {date, expense/income category and
                 // option} equals the selectionArgs to return a Cursor containing rows of the table.
                 String sql_budget_days_with_spending = "select DISTINCT " + ExpenseContract.ExpenseEntry.COLUMN_DATE +  " from (" +
-                        "select " + ExpenseContract.ExpenseEntry.COLUMN_DATE + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME + " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + "<=" + selectionArgs[0] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + "<= " + selectionArgs[1] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + "<= " + selectionArgs[2] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" + " INTERSECT " +
-                        "select " + ExpenseContract.ExpenseEntry.COLUMN_DATE + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME + " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + ">=" + selectionArgs[3] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + ">= " + selectionArgs[4] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + ">= " + selectionArgs[5] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" +
+                        "select " + ExpenseContract.ExpenseEntry.COLUMN_DATE + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME +
+                        " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + "<=" + selectionArgs[0] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + "<= " + selectionArgs[1] +
+                        " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + "<= " + selectionArgs[2] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] +
+                        " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" + " INTERSECT " +
+                        "select " + ExpenseContract.ExpenseEntry.COLUMN_DATE + " from " + ExpenseContract.ExpenseEntry.TABLE_NAME +
+                        " where " + ExpenseContract.ExpenseEntry.COLUMN_DAY + ">=" + selectionArgs[3] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_MONTH + ">= " + selectionArgs[4] +
+                        " AND " + ExpenseContract.ExpenseEntry.COLUMN_YEAR + ">= " + selectionArgs[5] + " AND " + ExpenseContract.ExpenseEntry.COLUMN_CATEGORY + "= " + selectionArgs[6] +
+                        " AND " + ExpenseContract.ExpenseEntry.COLUMN_OPTION + "= " + "'Expense'" +
                         ")";
                 cursor = database.rawQuery(sql_budget_days_with_spending, null);
                 break;

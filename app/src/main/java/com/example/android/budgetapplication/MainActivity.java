@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -184,8 +185,7 @@ public class MainActivity extends AppCompatActivity
 //        for (java.io.File oneFile : files){
 //            System.out.println("wj file name: " + oneFile.getName());
 //        }
-
-
+        signIn();
     }
 
     private void updateSignIn(GoogleSignInAccount account) {
@@ -235,82 +235,6 @@ public class MainActivity extends AppCompatActivity
 
         }
     }
-//
-//    /**
-//     * Create a new file and save it to Drive.
-//     */
-//    private void saveFileToDrive(final String filePath) {
-//        // Start by creating a new contents, and setting a callback.
-//        Log.i("MainActivity", "Creating new contents. wj ");
-//
-//        mDriveResourceClient
-//                .createContents()
-//                .continueWithTask(
-//                        new Continuation<DriveContents, Task<Void>>() {
-//                            @Override
-//                            public Task<Void> then(@NonNull Task<DriveContents> task) throws Exception {
-//                                return createFileIntentSender(task.getResult(), new File(filePath));
-//                            }
-//                        })
-//                .addOnFailureListener(
-//                        new OnFailureListener() {
-//                            @Override
-//                            public void onFailure(@NonNull Exception e) {
-//                                Log.w("MainActivity", "Failed to create new contents. wj", e);
-//                            }
-//                        });
-//    }
-//
-//    /**
-//     * Creates an {@link IntentSender} to start a dialog activity with configured {@link
-//     * CreateFileActivityOptions} for user to create a new photo in Drive.
-//     */
-//    private Task<Void> createFileIntentSender(DriveContents driveContents, File file) throws Exception {
-//        Log.i("MainActivity", "New contents created. wj");
-//
-//        OutputStream outputStream = driveContents.getOutputStream();
-//        InputStream in = new FileInputStream(file);
-//        try {
-//            try {
-//                // Transfer bytes from in to out
-//                byte[] buf = new byte[1024];
-//                int len;
-//                while ((len = in.read(buf)) > 0) {
-//                    outputStream.write(buf, 0, len);
-//                }
-//            } finally {
-//                outputStream.close();
-//            }
-//        } finally {
-//            in.close();
-//        }
-//
-//
-//        // Create the initial metadata - MIME type and title.
-//        // Note that the user will be able to change the title later.
-//        MetadataChangeSet metadataChangeSet =
-//                new MetadataChangeSet.Builder()
-//                        .setMimeType(getMimeType( dbUri))
-//                        .setTitle("expenses.db")
-//                        .build();
-//        // Set up options to configure and display the create file activity.
-//        CreateFileActivityOptions createFileActivityOptions =
-//                new CreateFileActivityOptions.Builder()
-//                        .setInitialMetadata(metadataChangeSet)
-//                        .setInitialDriveContents(driveContents)
-//                        .build();
-//
-//        return mDriveClient
-//                .newCreateFileActivityIntentSender(createFileActivityOptions)
-//                .continueWith(
-//                        new Continuation<IntentSender, Void>() {
-//                            @Override
-//                            public Void then(@NonNull Task<IntentSender> task) throws Exception {
-//                                startIntentSenderForResult(task.getResult(), REQUEST_CODE_CREATOR, null, 0, 0, 0);
-//                                return null;
-//                            }
-//                        });
-//    }
 
 
     /**
@@ -1136,6 +1060,11 @@ public class MainActivity extends AppCompatActivity
             }else {
                 Toast.makeText(getApplicationContext(), "Please login first!", Toast.LENGTH_LONG).show();
             }
+        } else if (id == R.id.clear_data) {
+            SQLiteDatabase expenseBackupDatabase = SQLiteDatabase.openDatabase("/data/user/0/com.example.android.budgetapplication/databases/expenses.db", null, SQLiteDatabase.OPEN_READWRITE);
+             expenseBackupDatabase.execSQL("DELETE from expenses");
+            expenseBackupDatabase.execSQL("DELETE from budget");
+            displayDatabaseInfo();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

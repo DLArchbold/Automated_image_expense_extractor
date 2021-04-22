@@ -1,0 +1,629 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.4" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
+  realizations="true" associations="true" dependencies="true" nesting-relationships="true" router="FAN">  
+  <class id="1" language="java" name="com.example.android.budgetapplication.CustomExpListView" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/CustomExpListView.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="99" width="174" x="159" y="-178"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="2" language="java" name="com.example.android.budgetapplication.GraphicOverlay.Graphic" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/GraphicOverlay.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="207" width="179" x="548" y="2165"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="3" language="java" name="com.example.android.budgetapplication.BudgetListActivity" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/BudgetListActivity.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="171" width="230" x="1873" y="717"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="4" language="java" name="com.example.android.budgetapplication.ManualBudgetActivity" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/ManualBudgetActivity.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="567" width="241" x="1535" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="5" language="java" name="com.example.android.budgetapplication.ManualEntryActivity" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/ManualEntryActivity.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="963" width="307" x="1167" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="6" language="java" name="com.example.android.budgetapplication.adapters.OneLevelExpenseAdapter" 
+    project="app" file="/app/src/main/java/com/example/android/budgetapplication/adapters/OneLevelExpenseAdapter.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="369" width="487" x="2463" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="7" language="java" name="com.example.android.budgetapplication.ImageRecognitionEntryActivity" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/ImageRecognitionEntryActivity.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="405" width="370" x="776" y="717"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="8" language="java" name="com.example.android.budgetapplication.adapters.SliderAdapter" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/adapters/SliderAdapter.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="225" width="573" x="2423" y="717"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="9" language="java" name="com.example.android.budgetapplication.CloudTextGraphic" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/CloudTextGraphic.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="207" width="223" x="748" y="2430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="10" language="java" name="com.example.android.budgetapplication.GraphicOverlay" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/GraphicOverlay.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="279" width="207" x="548" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="11" language="java" name="com.example.android.budgetapplication.DatePickerFragment" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/DatePickerFragment.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="117" width="199" x="373" y="-178"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="12" language="java" name="com.example.android.budgetapplication.DriveServiceHelper.deleteBackupsTask" 
+    project="app" file="/app/src/main/java/com/example/android/budgetapplication/DriveServiceHelper.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="99" width="265" x="3850" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="13" language="java" name="com.example.android.budgetapplication.DriveServiceHelper.restoreAsyncTask" 
+    project="app" file="/app/src/main/java/com/example/android/budgetapplication/DriveServiceHelper.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="99" width="271" x="3328" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="14" language="java" name="com.example.android.budgetapplication.DriveServiceHelper" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/DriveServiceHelper.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="315" width="453" x="3641" y="717"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="15" language="java" name="com.example.android.budgetapplication.WayActivity" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/WayActivity.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="99" width="174" x="1167" y="-178"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="16" language="java" name="com.example.android.budgetapplication.CircleTransform" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/CircleTransform.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="117" width="174" x="1207" y="717"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="17" language="java" name="com.example.android.budgetapplication.restoreBackupTaskParams" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/restoreBackupTaskParams.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="135" width="259" x="3620" y="2165"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="18" language="java" name="com.example.android.budgetapplication.CameraPreview" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/CameraPreview.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="171" width="249" x="612" y="-178"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="19" language="java" name="com.example.android.budgetapplication.data.BudgetContract" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/data/BudgetContract.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="81" width="195" x="1772" y="2165"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="20" language="java" name="com.example.android.budgetapplication.data.ExpenseDbHelper" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/data/ExpenseDbHelper.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="171" width="216" x="2186" y="2165"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="21" language="java" name="com.example.android.budgetapplication.data.ExpenseProvider" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/data/ExpenseProvider.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="405" width="277" x="2990" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="22" language="java" name="com.example.android.budgetapplication.MainActivity" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/MainActivity.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="855" width="612" x="3017" y="-178"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="23" language="java" name="com.example.android.budgetapplication.ExpenseBackupDatabaseHelper" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/ExpenseBackupDatabaseHelper.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="279" width="226" x="901" y="-178"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="24" language="java" name="com.example.android.budgetapplication.data.ExpenseContract" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/data/ExpenseContract.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="81" width="195" x="2484" y="2165"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="25" language="java" name="com.example.android.budgetapplication.data.ExpenseContract.ExpenseEntry" 
+    project="app" file="/app/src/main/java/com/example/android/budgetapplication/data/ExpenseContract.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="387" width="195" x="2444" y="2430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="26" language="java" name="com.example.android.budgetapplication.LocationService" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/LocationService.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="225" width="221" x="1167" y="2165"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="27" language="java" name="com.example.android.budgetapplication.deleteBackupTaskParams" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/deleteBackupTaskParams.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="135" width="253" x="3919" y="2165"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="28" language="java" name="com.example.android.budgetapplication.data.BudgetContract.BudgetEntry" 
+    project="app" file="/app/src/main/java/com/example/android/budgetapplication/data/BudgetContract.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="405" width="195" x="1855" y="2430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="29" language="java" name="com.example.android.budgetapplication.adapters.BudgetAdapter" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/adapters/BudgetAdapter.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="243" width="256" x="1837" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="30" language="java" name="com.example.android.budgetapplication.adapters.ExpandableListAdapter" 
+    project="app" file="/app/src/main/java/com/example/android/budgetapplication/adapters/ExpandableListAdapter.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="315" width="391" x="1421" y="717"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="31" language="java" name="com.example.android.budgetapplication.data.BudgetProvider" project="app" 
+    file="/app/src/main/java/com/example/android/budgetapplication/data/BudgetProvider.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="351" width="269" x="2133" y="1162"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <association id="32">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="33" name="mGraphicOverlay"/>      
+      <multiplicity id="34" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="35">    
+    <bendpoint x="2155" y="2165"/>    
+    <end type="SOURCE" refId="31"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="36">    
+    <bendpoint x="2453" y="2165"/>    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <association id="37">    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="38" name="mDriveServiceHelper"/>      
+      <multiplicity id="39" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="14" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="40">    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="41" name="locServ"/>      
+      <multiplicity id="42" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="26" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="43">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <dependency id="44">    
+    <end type="SOURCE" refId="31"/>    
+    <end type="TARGET" refId="24"/>  
+  </dependency>  
+  <association id="45">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="46" name="expensePageAdapters"/>      
+      <multiplicity id="47" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="48">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="27"/>  
+  </dependency>  
+  <dependency id="49">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <generalization id="50">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="2"/>  
+  </generalization>  
+  <nesting id="51">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="28"/>  
+  </nesting>  
+  <dependency id="52">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="24"/>  
+  </dependency>  
+  <dependency id="53">    
+    <bendpoint x="3297" y="717"/>    
+    <bendpoint x="3297" y="1162"/>    
+    <bendpoint x="3297" y="2165"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="54">    
+    <bendpoint x="3650" y="1162"/>    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="17"/>  
+  </dependency>  
+  <dependency id="55">    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <dependency id="56">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="57">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="58">    
+    <bendpoint x="785" y="1162"/>    
+    <bendpoint x="785" y="2165"/>    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="9"/>  
+  </dependency>  
+  <dependency id="59">    
+    <bendpoint x="1741" y="2165"/>    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <association id="60">    
+    <end type="SOURCE" refId="31" navigable="false">      
+      <attribute id="61" name="mDbHelper"/>      
+      <multiplicity id="62" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="20" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="63">    
+    <bendpoint x="2066" y="2165"/>    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="64">    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="16"/>  
+  </dependency>  
+  <dependency id="65">    
+    <bendpoint x="1806" y="1162"/>    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <association id="66">    
+    <end type="SOURCE" refId="10" navigable="false">      
+      <attribute id="67" name="graphics"/>      
+      <multiplicity id="68" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="2" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="69">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="24"/>  
+  </dependency>  
+  <association id="70">    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="71" name="overlay"/>      
+      <multiplicity id="72" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="73">    
+    <bendpoint x="4124" y="717"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="12"/>  
+  </dependency>  
+  <association id="74">    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="75" name="sliderAdapter"/>      
+      <multiplicity id="76" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="77">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="29"/>  
+  </dependency>  
+  <dependency id="78">    
+    <bendpoint x="3318" y="2165"/>    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="79">    
+    <bendpoint x="4145" y="717"/>    
+    <bendpoint x="4145" y="1162"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="27"/>  
+  </dependency>  
+  <dependency id="80">    
+    <end type="SOURCE" refId="31"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <dependency id="81">    
+    <bendpoint x="1720" y="2165"/>    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="82">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="24"/>  
+  </dependency>  
+  <dependency id="83">    
+    <bendpoint x="3610" y="717"/>    
+    <bendpoint x="3629" y="1162"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="17"/>  
+  </dependency>  
+  <association id="84">    
+    <bendpoint x="757" y="2165"/>    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="85" name="overlay"/>      
+      <multiplicity id="86" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="87">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="2"/>  
+  </nesting>  
+  <dependency id="88">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <nesting id="89">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="13"/>  
+  </nesting>  
+  <dependency id="90">    
+    <bendpoint x="1997" y="2165"/>    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="91">    
+    <bendpoint x="1842" y="717"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="92">    
+    <bendpoint x="3026" y="717"/>    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="6"/>  
+  </dependency>  
+  <association id="93">    
+    <end type="SOURCE" refId="21" navigable="false">      
+      <attribute id="94" name="mDbHelper"/>      
+      <multiplicity id="95" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="20" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="96">    
+    <bendpoint x="2726" y="2165"/>    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="97">    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="30"/>  
+  </dependency>  
+  <dependency id="98">    
+    <bendpoint x="1176" y="717"/>    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="99">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="24"/>  
+  </dependency>  
+  <dependency id="100">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <association id="101">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="102" name="incomePageAdapters"/>      
+      <multiplicity id="103" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="104">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="12"/>  
+  </nesting>  
+  <nesting id="105">    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="25"/>  
+  </nesting>  
+  <dependency id="106">    
+    <bendpoint x="2432" y="1162"/>    
+    <bendpoint x="2432" y="2165"/>    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="107">    
+    <bendpoint x="1504" y="1162"/>    
+    <bendpoint x="1504" y="2165"/>    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="108">    
+    <bendpoint x="2087" y="2165"/>    
+    <end type="SOURCE" refId="31"/>    
+    <end type="TARGET" refId="28"/>  
+  </dependency>  
+  <dependency id="109">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="17"/>  
+  </dependency>  
+  <dependency id="110">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="111">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <dependency id="112">    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>
